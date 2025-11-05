@@ -55,9 +55,12 @@ const upload = multer({
     }
 });
 
+// Access code from environment variable
+const ACCESS_CODE = process.env.ACCESS_CODE || '웰시댕구';
+
 // Authentication middleware
 const isAuthenticated = (req, res, next) => {
-    if (req.session.userId) {
+    if (req.session.authenticated) {
         next();
     } else {
         res.status(401).json({ error: 'Unauthorized' });
@@ -67,6 +70,28 @@ const isAuthenticated = (req, res, next) => {
 // ================================
 // Authentication Routes
 // ================================
+
+// Simple access code authentication
+app.post('/api/access', (req, res) => {
+    try {
+        const { accessCode } = req.body;
+
+        if (!accessCode) {
+            return res.status(400).json({ error: 'Access code is required' });
+        }
+
+        if (accessCode === ACCESS_CODE) {
+            req.session.authenticated = true;
+            req.session.userId = 1; // Single user system
+            res.json({ message: 'Access granted' });
+        } else {
+            res.status(401).json({ error: 'Invalid access code' });
+        }
+    } catch (error) {
+        console.error('Access error:', error);
+        res.status(500).json({ error: 'Access failed' });
+    }
+});
 
 app.post('/api/register', async (req, res) => {
     try {
@@ -134,9 +159,8 @@ app.post('/api/logout', (req, res) => {
 });
 
 app.get('/api/auth/check', (req, res) => {
-    if (req.session.userId) {
-        const user = db.getUserById(req.session.userId);
-        res.json({ authenticated: true, userId: user.id, username: user.username });
+    if (req.session.authenticated) {
+        res.json({ authenticated: true, userId: 1, username: 'User' });
     } else {
         res.json({ authenticated: false });
     }
