@@ -1,0 +1,931 @@
+// ================================
+// Global State Management
+// ================================
+
+const state = {
+    // Document state
+    currentDocument: null,
+    documentType: null, // 'pdf' or 'epub'
+
+    // PDF specific
+    pdfDoc: null,
+    currentPage: 1,
+    pageCount: 0,
+    scale: 1.5,
+    rendering: false,
+
+    // EPUB specific
+    epubBook: null,
+    epubRendition: null,
+
+    // Translation & Grammar
+    selectedText: '',
+    currentTranslation: '',
+    currentGrammar: '',
+
+    // Vocabulary
+    vocabulary: [],
+
+    // Table of Contents
+    tableOfContents: []
+};
+
+// ================================
+// DOM Elements
+// ================================
+
+const elements = {
+    // File upload
+    fileInput: document.getElementById('fileInput'),
+    uploadBtn: document.getElementById('uploadBtn'),
+
+    // PDF controls
+    prevPageBtn: document.getElementById('prevPage'),
+    nextPageBtn: document.getElementById('nextPage'),
+    pageNum: document.getElementById('pageNum'),
+    pageCount: document.getElementById('pageCount'),
+    zoomInBtn: document.getElementById('zoomIn'),
+    zoomOutBtn: document.getElementById('zoomOut'),
+    zoomLevel: document.getElementById('zoomLevel'),
+
+    // Containers
+    pdfContainer: document.getElementById('pdfContainer'),
+    pdfCanvas: document.getElementById('pdfCanvas'),
+    textLayer: document.getElementById('textLayer'),
+    epubContainer: document.getElementById('epubContainer'),
+    welcomeMessage: document.getElementById('welcomeMessage'),
+
+    // Translation popup
+    translationPopup: document.getElementById('translationPopup'),
+    selectedTextEl: document.getElementById('selectedText'),
+    translationText: document.getElementById('translationText'),
+    grammarText: document.getElementById('grammarText'),
+    closePopupBtn: document.getElementById('closePopup'),
+    retranslateBtn: document.getElementById('retranslateBtn'),
+    addToVocabBtn: document.getElementById('addToVocabBtn'),
+
+    // Table of Contents
+    tocList: document.getElementById('tocList'),
+
+    // Vocabulary
+    vocabList: document.getElementById('vocabList'),
+    vocabTotal: document.getElementById('vocabTotal'),
+    vocabToday: document.getElementById('vocabToday'),
+    exportVocabBtn: document.getElementById('exportVocab'),
+    clearVocabBtn: document.getElementById('clearVocab'),
+
+    // Loading overlay
+    loadingOverlay: document.getElementById('loadingOverlay')
+};
+
+// ================================
+// Initialization
+// ================================
+
+function init() {
+    loadVocabulary();
+    setupEventListeners();
+    updateVocabStats();
+}
+
+function setupEventListeners() {
+    // File upload
+    elements.uploadBtn.addEventListener('click', () => elements.fileInput.click());
+    elements.fileInput.addEventListener('change', handleFileSelect);
+
+    // PDF navigation
+    elements.prevPageBtn.addEventListener('click', () => changePage(-1));
+    elements.nextPageBtn.addEventListener('click', () => changePage(1));
+    elements.zoomInBtn.addEventListener('click', () => changeZoom(0.1));
+    elements.zoomOutBtn.addEventListener('click', () => changeZoom(-0.1));
+
+    // Text selection
+    document.addEventListener('mouseup', handleTextSelection);
+
+    // Translation popup
+    elements.closePopupBtn.addEventListener('click', closeTranslationPopup);
+    elements.retranslateBtn.addEventListener('click', retranslate);
+    elements.addToVocabBtn.addEventListener('click', addToVocabulary);
+
+    // Vocabulary actions
+    elements.exportVocabBtn.addEventListener('click', exportVocabulary);
+    elements.clearVocabBtn.addEventListener('click', clearVocabulary);
+}
+
+// ================================
+// File Handling
+// ================================
+
+async function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const fileName = file.name.toLowerCase();
+
+    showLoading(true);
+
+    try {
+        if (fileName.endsWith('.pdf')) {
+            await loadPDF(file);
+        } else if (fileName.endsWith('.epub')) {
+            await loadEPUB(file);
+        } else {
+            alert('Please select a PDF or EPUB file');
+        }
+
+        elements.welcomeMessage.style.display = 'none';
+    } catch (error) {
+        console.error('Error loading file:', error);
+        alert('Error loading file: ' + error.message);
+    } finally {
+        showLoading(false);
+    }
+}
+
+// ================================
+// PDF Handling
+// ================================
+
+async function loadPDF(file) {
+    state.documentType = 'pdf';
+
+    const arrayBuffer = await file.arrayBuffer();
+    const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+    state.pdfDoc = await loadingTask.promise;
+    state.pageCount = state.pdfDoc.numPages;
+    state.currentPage = 1;
+
+    // Show PDF container
+    elements.pdfContainer.style.display = 'flex';
+    elements.epubContainer.style.display = 'none';
+
+    // Update UI
+    elements.pageCount.textContent = state.pageCount;
+    elements.prevPageBtn.disabled = false;
+    elements.nextPageBtn.disabled = false;
+
+    // Load first page
+    await renderPage(state.currentPage);
+
+    // Load table of contents
+    await loadPDFTableOfContents();
+}
+
+async function renderPage(pageNum) {
+    if (state.rendering) return;
+    state.rendering = true;
+
+    const page = await state.pdfDoc.getPage(pageNum);
+    const viewport = page.getViewport({ scale: state.scale });
+
+    const canvas = elements.pdfCanvas;
+    const context = canvas.getContext('2d');
+    canvas.height = viewport.height;
+    canvas.width = viewport.width;
+
+    const renderContext = {
+        canvasContext: context,
+        viewport: viewport
+    };
+
+    await page.render(renderContext).promise;
+
+    // Render text layer for selection
+    await renderTextLayer(page, viewport);
+
+    // Update UI
+    state.currentPage = pageNum;
+    elements.pageNum.textContent = pageNum;
+    elements.prevPageBtn.disabled = pageNum <= 1;
+    elements.nextPageBtn.disabled = pageNum >= state.pageCount;
+
+    state.rendering = false;
+}
+
+async function renderTextLayer(page, viewport) {
+    const textContent = await page.getTextContent();
+    const textLayer = elements.textLayer;
+
+    // Clear existing text layer
+    textLayer.innerHTML = '';
+    textLayer.style.width = viewport.width + 'px';
+    textLayer.style.height = viewport.height + 'px';
+
+    // Render text items
+    textContent.items.forEach(item => {
+        const span = document.createElement('span');
+        const tx = pdfjsLib.Util.transform(
+            viewport.transform,
+            item.transform
+        );
+
+        span.textContent = item.str;
+        span.style.left = tx[4] + 'px';
+        span.style.top = tx[5] + 'px';
+        span.style.fontSize = Math.abs(tx[3]) + 'px';
+        span.style.fontFamily = item.fontName;
+
+        textLayer.appendChild(span);
+    });
+}
+
+async function loadPDFTableOfContents() {
+    try {
+        const outline = await state.pdfDoc.getOutline();
+        if (outline && outline.length > 0) {
+            state.tableOfContents = outline;
+            renderTableOfContents(outline);
+        } else {
+            elements.tocList.innerHTML = '<li class="toc-item" style="color: #999;">No table of contents available</li>';
+        }
+    } catch (error) {
+        console.error('Error loading PDF table of contents:', error);
+        elements.tocList.innerHTML = '<li class="toc-item" style="color: #999;">Error loading TOC</li>';
+    }
+}
+
+function changePage(delta) {
+    const newPage = state.currentPage + delta;
+    if (newPage >= 1 && newPage <= state.pageCount) {
+        renderPage(newPage);
+    }
+}
+
+function changeZoom(delta) {
+    state.scale = Math.max(0.5, Math.min(3, state.scale + delta));
+    elements.zoomLevel.textContent = Math.round(state.scale * 100) + '%';
+    renderPage(state.currentPage);
+}
+
+// ================================
+// EPUB Handling
+// ================================
+
+async function loadEPUB(file) {
+    state.documentType = 'epub';
+
+    const arrayBuffer = await file.arrayBuffer();
+
+    // Create EPUB book
+    state.epubBook = ePub();
+    await state.epubBook.open(arrayBuffer);
+
+    // Show EPUB container
+    elements.pdfContainer.style.display = 'none';
+    elements.epubContainer.style.display = 'block';
+
+    // Disable PDF controls
+    elements.prevPageBtn.disabled = true;
+    elements.nextPageBtn.disabled = true;
+    elements.pageNum.textContent = '-';
+    elements.pageCount.textContent = '-';
+
+    // Render EPUB
+    state.epubRendition = state.epubBook.renderTo(elements.epubContainer, {
+        width: '100%',
+        height: '100%',
+        spread: 'none'
+    });
+
+    await state.epubRendition.display();
+
+    // Load table of contents
+    await loadEPUBTableOfContents();
+
+    // Enable text selection
+    setupEPUBTextSelection();
+}
+
+async function loadEPUBTableOfContents() {
+    try {
+        const navigation = await state.epubBook.loaded.navigation;
+        if (navigation.toc && navigation.toc.length > 0) {
+            state.tableOfContents = navigation.toc;
+            renderEPUBTableOfContents(navigation.toc);
+        } else {
+            elements.tocList.innerHTML = '<li class="toc-item" style="color: #999;">No table of contents available</li>';
+        }
+    } catch (error) {
+        console.error('Error loading EPUB table of contents:', error);
+        elements.tocList.innerHTML = '<li class="toc-item" style="color: #999;">Error loading TOC</li>';
+    }
+}
+
+function renderEPUBTableOfContents(toc, level = 1) {
+    elements.tocList.innerHTML = '';
+
+    function addTocItems(items, parentElement, depth) {
+        items.forEach(item => {
+            const li = document.createElement('li');
+            li.className = `toc-item level-${depth}`;
+            li.textContent = item.label;
+            li.addEventListener('click', () => {
+                state.epubRendition.display(item.href);
+            });
+            parentElement.appendChild(li);
+
+            if (item.subitems && item.subitems.length > 0) {
+                addTocItems(item.subitems, parentElement, depth + 1);
+            }
+        });
+    }
+
+    addTocItems(toc, elements.tocList, level);
+}
+
+function setupEPUBTextSelection() {
+    state.epubRendition.on('selected', (cfiRange, contents) => {
+        const selection = contents.window.getSelection();
+        const text = selection.toString().trim();
+
+        if (text.length > 0) {
+            state.selectedText = text;
+            showTranslationPopup(text);
+        }
+    });
+}
+
+// ================================
+// Table of Contents (PDF)
+// ================================
+
+function renderTableOfContents(outline, level = 1) {
+    elements.tocList.innerHTML = '';
+
+    function addOutlineItems(items, parentElement, depth) {
+        items.forEach(item => {
+            const li = document.createElement('li');
+            li.className = `toc-item level-${depth}`;
+            li.textContent = item.title;
+
+            li.addEventListener('click', async () => {
+                if (item.dest) {
+                    const dest = typeof item.dest === 'string'
+                        ? await state.pdfDoc.getDestination(item.dest)
+                        : item.dest;
+
+                    if (dest) {
+                        const pageIndex = await state.pdfDoc.getPageIndex(dest[0]);
+                        await renderPage(pageIndex + 1);
+                    }
+                }
+            });
+
+            parentElement.appendChild(li);
+
+            if (item.items && item.items.length > 0) {
+                addOutlineItems(item.items, parentElement, depth + 1);
+            }
+        });
+    }
+
+    addOutlineItems(outline, elements.tocList, level);
+}
+
+// ================================
+// Text Selection & Translation
+// ================================
+
+function handleTextSelection(event) {
+    if (state.documentType !== 'pdf') return;
+
+    const selection = window.getSelection();
+    const text = selection.toString().trim();
+
+    if (text.length > 0) {
+        state.selectedText = text;
+        showTranslationPopup(text);
+    }
+}
+
+async function showTranslationPopup(text) {
+    // Show popup
+    elements.translationPopup.classList.remove('hidden');
+    elements.selectedTextEl.textContent = text;
+
+    // Reset content
+    elements.translationText.textContent = 'Loading translation...';
+    elements.translationText.classList.add('loading');
+    elements.grammarText.textContent = 'Analyzing grammar...';
+    elements.grammarText.classList.add('loading');
+
+    // Load translation and grammar
+    await loadTranslation(text);
+    await loadGrammarExplanation(text);
+}
+
+function closeTranslationPopup() {
+    elements.translationPopup.classList.add('hidden');
+}
+
+async function retranslate() {
+    if (state.selectedText) {
+        showTranslationPopup(state.selectedText);
+    }
+}
+
+// ================================
+// Translation Service
+// ================================
+
+async function loadTranslation(text) {
+    try {
+        // Using MyMemory Translation API (Free, no API key required)
+        const response = await fetch(
+            `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|ko`
+        );
+
+        const data = await response.json();
+
+        if (data.responseStatus === 200 && data.responseData) {
+            state.currentTranslation = data.responseData.translatedText;
+            elements.translationText.textContent = state.currentTranslation;
+            elements.translationText.classList.remove('loading');
+        } else {
+            throw new Error('Translation failed');
+        }
+    } catch (error) {
+        console.error('Translation error:', error);
+        elements.translationText.textContent = '❌ Translation failed. Please try again.';
+        elements.translationText.classList.remove('loading');
+    }
+}
+
+// ================================
+// Grammar Explanation
+// ================================
+
+async function loadGrammarExplanation(text) {
+    try {
+        // For grammar explanation, we'll use a simple pattern-based approach
+        // In a production app, you'd want to use a proper NLP API
+        const explanation = analyzeGrammar(text);
+
+        state.currentGrammar = explanation;
+        elements.grammarText.innerHTML = explanation;
+        elements.grammarText.classList.remove('loading');
+    } catch (error) {
+        console.error('Grammar analysis error:', error);
+        elements.grammarText.textContent = '❌ Grammar analysis failed.';
+        elements.grammarText.classList.remove('loading');
+    }
+}
+
+function analyzeGrammar(text) {
+    // Simple grammar analysis
+    let analysis = '<ul>';
+
+    // Sentence type
+    if (text.endsWith('?')) {
+        analysis += '<li><strong>Type:</strong> Question (의문문)</li>';
+    } else if (text.endsWith('!')) {
+        analysis += '<li><strong>Type:</strong> Exclamation (감탄문)</li>';
+    } else {
+        analysis += '<li><strong>Type:</strong> Statement (평서문)</li>';
+    }
+
+    // Tense detection
+    if (text.match(/\b(is|are|am)\b/i)) {
+        analysis += '<li><strong>Tense:</strong> Present Simple (현재 시제)</li>';
+    } else if (text.match(/\b(was|were)\b/i)) {
+        analysis += '<li><strong>Tense:</strong> Past Simple (과거 시제)</li>';
+    } else if (text.match(/\b(will|shall)\b/i)) {
+        analysis += '<li><strong>Tense:</strong> Future (미래 시제)</li>';
+    } else if (text.match(/\b(have|has|had)\b.*\b\w+ed\b/i)) {
+        analysis += '<li><strong>Tense:</strong> Perfect (완료 시제)</li>';
+    }
+
+    // Detect modal verbs
+    const modals = text.match(/\b(can|could|may|might|must|should|would|will)\b/gi);
+    if (modals) {
+        analysis += `<li><strong>Modal Verbs:</strong> ${modals.join(', ')} (조동사)</li>`;
+    }
+
+    // Detect passive voice
+    if (text.match(/\b(is|are|was|were|been)\b.*\b\w+ed\b/i)) {
+        analysis += '<li><strong>Voice:</strong> Passive (수동태)</li>';
+    }
+
+    // Word count
+    const words = text.split(/\s+/).length;
+    analysis += `<li><strong>Word Count:</strong> ${words}</li>`;
+
+    analysis += '</ul>';
+
+    return analysis;
+}
+
+// ================================
+// Vocabulary Management
+// ================================
+
+function loadVocabulary() {
+    const saved = localStorage.getItem('vocabulary');
+    if (saved) {
+        state.vocabulary = JSON.parse(saved);
+    }
+}
+
+function saveVocabulary() {
+    localStorage.setItem('vocabulary', JSON.stringify(state.vocabulary));
+    updateVocabStats();
+    renderVocabularyList();
+}
+
+function addToVocabulary() {
+    if (!state.selectedText || !state.currentTranslation) return;
+
+    // Check if already exists
+    const exists = state.vocabulary.some(item => item.word === state.selectedText);
+    if (exists) {
+        alert('This word is already in your vocabulary!');
+        return;
+    }
+
+    const vocabItem = {
+        word: state.selectedText,
+        translation: state.currentTranslation,
+        grammar: state.currentGrammar,
+        date: new Date().toISOString(),
+        reviewCount: 0
+    };
+
+    state.vocabulary.unshift(vocabItem);
+    saveVocabulary();
+
+    alert('✅ Added to vocabulary!');
+}
+
+function updateVocabStats() {
+    elements.vocabTotal.textContent = state.vocabulary.length;
+
+    const today = new Date().toDateString();
+    const todayCount = state.vocabulary.filter(item => {
+        const itemDate = new Date(item.date).toDateString();
+        return itemDate === today;
+    }).length;
+
+    elements.vocabToday.textContent = todayCount;
+}
+
+function renderVocabularyList() {
+    if (state.vocabulary.length === 0) {
+        elements.vocabList.innerHTML = '<p style="color: #999; text-align: center; margin-top: 2rem;">No words saved yet</p>';
+        return;
+    }
+
+    elements.vocabList.innerHTML = '';
+
+    state.vocabulary.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'vocab-item';
+        div.innerHTML = `
+            <div class="vocab-word">${item.word}</div>
+            <div class="vocab-translation">${item.translation}</div>
+        `;
+
+        div.addEventListener('click', () => {
+            showVocabularyDetail(item);
+        });
+
+        elements.vocabList.appendChild(div);
+    });
+}
+
+function showVocabularyDetail(item) {
+    elements.translationPopup.classList.remove('hidden');
+    elements.selectedTextEl.textContent = item.word;
+    elements.translationText.textContent = item.translation;
+    elements.translationText.classList.remove('loading');
+    elements.grammarText.innerHTML = item.grammar;
+    elements.grammarText.classList.remove('loading');
+}
+
+function exportVocabulary() {
+    if (state.vocabulary.length === 0) {
+        alert('No vocabulary to export!');
+        return;
+    }
+
+    const data = JSON.stringify(state.vocabulary, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `vocabulary_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+
+    URL.revokeObjectURL(url);
+}
+
+function clearVocabulary() {
+    if (!confirm('Are you sure you want to clear all vocabulary? This cannot be undone.')) {
+        return;
+    }
+
+    state.vocabulary = [];
+    saveVocabulary();
+}
+
+// ================================
+// Utility Functions
+// ================================
+
+function showLoading(show) {
+    if (show) {
+        elements.loadingOverlay.classList.remove('hidden');
+    } else {
+        elements.loadingOverlay.classList.add('hidden');
+    }
+}
+
+// ================================
+// Bionic Reading Functions
+// ================================
+
+const bionicSettings = {
+    enabled: false,
+    fixation: 2,
+    saccade: 1,
+    opacity: 70,
+    mode: 'letters',
+    apply: 'all'
+};
+
+function setupBionicEventListeners() {
+    // Sidebar tabs
+    document.querySelectorAll('.sidebar-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            const tabName = tab.dataset.tab;
+            switchSidebarTab(tabName);
+        });
+    });
+
+    // Bionic settings
+    document.getElementById('bionicEnabled').addEventListener('change', (e) => {
+        bionicSettings.enabled = e.target.checked;
+        if (bionicSettings.enabled) {
+            applyBionicReading();
+        } else {
+            removeBionicReading();
+        }
+    });
+
+    document.getElementById('fixationLevel').addEventListener('input', (e) => {
+        bionicSettings.fixation = parseInt(e.target.value);
+        document.getElementById('fixationValue').textContent = e.target.value;
+    });
+
+    document.getElementById('saccadeLevel').addEventListener('input', (e) => {
+        bionicSettings.saccade = parseInt(e.target.value);
+        document.getElementById('saccadeValue').textContent = e.target.value;
+    });
+
+    document.getElementById('opacityLevel').addEventListener('input', (e) => {
+        bionicSettings.opacity = parseInt(e.target.value);
+        document.getElementById('opacityValue').textContent = e.target.value + '%';
+    });
+
+    document.getElementById('bionicMode').addEventListener('change', (e) => {
+        bionicSettings.mode = e.target.value;
+    });
+
+    document.getElementById('bionicApply').addEventListener('change', (e) => {
+        bionicSettings.apply = e.target.value;
+    });
+
+    document.getElementById('applyBionic').addEventListener('click', () => {
+        if (bionicSettings.enabled) {
+            applyBionicReading();
+        }
+    });
+
+    document.getElementById('bionicToggle').addEventListener('click', () => {
+        switchSidebarTab('bionic');
+    });
+}
+
+function switchSidebarTab(tabName) {
+    // Update tabs
+    document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+    // Update content
+    document.querySelectorAll('.sidebar-content').forEach(c => c.classList.remove('active'));
+    document.getElementById(tabName + 'Content').classList.add('active');
+}
+
+function applyBionicReading() {
+    const container = state.documentType === 'epub' ? elements.epubContainer : elements.textLayer;
+
+    if (!container) return;
+
+    // Get all text nodes
+    const textNodes = getTextNodes(container);
+
+    textNodes.forEach(node => {
+        if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+            const words = node.textContent.split(/\s+/);
+            const fragment = document.createDocumentFragment();
+
+            words.forEach((word, index) => {
+                if (index > 0) {
+                    fragment.appendChild(document.createTextNode(' '));
+                }
+
+                // Apply saccade (skip some words)
+                if (index % (bionicSettings.saccade + 1) !== 0) {
+                    fragment.appendChild(document.createTextNode(word));
+                    return;
+                }
+
+                const processed = processBionicWord(word);
+                fragment.appendChild(processed);
+            });
+
+            node.parentNode.replaceChild(fragment, node);
+        }
+    });
+}
+
+function processBionicWord(word) {
+    const span = document.createElement('span');
+
+    if (word.length <= 1) {
+        span.textContent = word;
+        return span;
+    }
+
+    let fixationCount;
+    if (bionicSettings.mode === 'syllables') {
+        fixationCount = Math.ceil(countSyllables(word) / 2);
+    } else {
+        fixationCount = Math.min(bionicSettings.fixation, Math.ceil(word.length / 2));
+    }
+
+    const boldPart = word.substring(0, fixationCount);
+    const normalPart = word.substring(fixationCount);
+
+    const boldSpan = document.createElement('span');
+    boldSpan.className = 'bionic-bold';
+    boldSpan.style.opacity = bionicSettings.opacity / 100;
+    boldSpan.textContent = boldPart;
+
+    const normalSpan = document.createElement('span');
+    normalSpan.className = 'bionic-text';
+    normalSpan.textContent = normalPart;
+
+    span.appendChild(boldSpan);
+    span.appendChild(normalSpan);
+
+    return span;
+}
+
+function countSyllables(word) {
+    word = word.toLowerCase();
+    if (word.length <= 3) return 1;
+
+    word = word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
+    word = word.replace(/^y/, '');
+
+    const syllables = word.match(/[aeiouy]{1,2}/g);
+    return syllables ? syllables.length : 1;
+}
+
+function removeBionicReading() {
+    const container = state.documentType === 'epub' ? elements.epubContainer : elements.textLayer;
+
+    if (!container) return;
+
+    const bionicElements = container.querySelectorAll('.bionic-bold, .bionic-text');
+    bionicElements.forEach(el => {
+        const text = el.textContent;
+        el.replaceWith(document.createTextNode(text));
+    });
+}
+
+function getTextNodes(node) {
+    const textNodes = [];
+
+    function traverse(n) {
+        if (n.nodeType === Node.TEXT_NODE) {
+            textNodes.push(n);
+        } else {
+            n.childNodes.forEach(child => traverse(child));
+        }
+    }
+
+    traverse(node);
+    return textNodes;
+}
+
+// ================================
+// Authentication & Backend Integration
+// ================================
+
+async function checkAuthentication() {
+    try {
+        const response = await fetch('/api/auth/check');
+        const data = await response.json();
+
+        if (!data.authenticated) {
+            window.location.href = '/login.html';
+            return false;
+        }
+
+        // Display user info
+        elements.userInfo.textContent = `👤 ${data.username}`;
+        return true;
+    } catch (error) {
+        console.error('Auth check error:', error);
+        window.location.href = '/login.html';
+        return false;
+    }
+}
+
+async function logout() {
+    try {
+        await fetch('/api/logout', { method: 'POST' });
+        window.location.href = '/login.html';
+    } catch (error) {
+        console.error('Logout error:', error);
+        alert('Logout failed');
+    }
+}
+
+// Add logout button handler
+document.getElementById('logoutBtn').addEventListener('click', logout);
+
+// ================================
+// Backend API Integration for Vocabulary
+// ================================
+
+async function syncVocabularyWithBackend() {
+    try {
+        const response = await fetch('/api/vocabulary');
+        if (response.ok) {
+            const vocabulary = await response.json();
+            state.vocabulary = vocabulary.map(item => ({
+                word: item.word,
+                translation: item.translation,
+                grammar: item.grammar,
+                date: item.created_at,
+                reviewCount: item.review_count || 0
+            }));
+            renderVocabularyList();
+            updateVocabStats();
+        }
+    } catch (error) {
+        console.error('Error syncing vocabulary:', error);
+    }
+}
+
+// Override addToVocabulary to use backend
+async function addToVocabularyWithBackend() {
+    if (!state.selectedText || !state.currentTranslation) return;
+
+    try {
+        const response = await fetch('/api/vocabulary', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                word: state.selectedText,
+                translation: state.currentTranslation,
+                grammar: state.currentGrammar,
+                context: ''
+            })
+        });
+
+        if (response.ok) {
+            alert('✅ Added to vocabulary!');
+            await syncVocabularyWithBackend();
+        } else {
+            const data = await response.json();
+            alert('❌ ' + (data.error || 'Failed to add vocabulary'));
+        }
+    } catch (error) {
+        console.error('Error adding vocabulary:', error);
+        alert('❌ Failed to add vocabulary');
+    }
+}
+
+// Replace the addToVocabulary function
+elements.addToVocabBtn.removeEventListener('click', addToVocabulary);
+elements.addToVocabBtn.addEventListener('click', addToVocabularyWithBackend);
+
+// ================================
+// Initialize App with Authentication
+// ================================
+
+async function initializeApp() {
+    const authenticated = await checkAuthentication();
+
+    if (authenticated) {
+        setupBionicEventListeners();
+        await syncVocabularyWithBackend();
+    }
+}
+
+// Call initialization
+initializeApp();

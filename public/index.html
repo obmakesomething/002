@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Reader with Translator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>📚 PDF Reader & Translator</h1>
+            <div class="controls">
+                <span id="userInfo" class="user-info"></span>
+                <button id="bionicToggle" class="btn btn-secondary">🧠 Bionic Reading</button>
+                <input type="file" id="fileInput" accept=".pdf,.epub" />
+                <button id="uploadBtn" class="btn">📁 Upload PDF/EPUB</button>
+                <button id="logoutBtn" class="btn" style="background: #e74c3c;">Logout</button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Sidebar - Table of Contents & Settings -->
+            <aside class="sidebar">
+                <div class="sidebar-tabs">
+                    <button class="sidebar-tab active" data-tab="toc">📑 TOC</button>
+                    <button class="sidebar-tab" data-tab="bionic">🧠 Bionic</button>
+                </div>
+
+                <div class="sidebar-content active" id="tocContent">
+                    <ul id="tocList" class="toc-list">
+                        <li class="toc-item" style="color: #999;">No content loaded</li>
+                    </ul>
+                </div>
+
+                <div class="sidebar-content" id="bionicContent">
+                    <h3>Bionic Reading Settings</h3>
+
+                    <div class="setting-group">
+                        <label>Enable Bionic Reading</label>
+                        <input type="checkbox" id="bionicEnabled" />
+                    </div>
+
+                    <div class="setting-group">
+                        <label>Fixation (강조 글자 수)</label>
+                        <input type="range" id="fixationLevel" min="1" max="5" value="2" />
+                        <span id="fixationValue">2</span>
+                    </div>
+
+                    <div class="setting-group">
+                        <label>Saccade (단어 간격)</label>
+                        <input type="range" id="saccadeLevel" min="1" max="5" value="1" />
+                        <span id="saccadeValue">1</span>
+                    </div>
+
+                    <div class="setting-group">
+                        <label>Opacity (강조 강도)</label>
+                        <input type="range" id="opacityLevel" min="1" max="100" value="70" />
+                        <span id="opacityValue">70%</span>
+                    </div>
+
+                    <div class="setting-group">
+                        <label>Mode</label>
+                        <select id="bionicMode">
+                            <option value="letters">Letters (글자)</option>
+                            <option value="syllables">Syllables (음절)</option>
+                        </select>
+                    </div>
+
+                    <div class="setting-group">
+                        <label>Apply To</label>
+                        <select id="bionicApply">
+                            <option value="all">Entire Document</option>
+                            <option value="selection">Selection Only</option>
+                        </select>
+                    </div>
+
+                    <button id="applyBionic" class="btn btn-secondary" style="width: 100%; margin-top: 1rem;">Apply Settings</button>
+                </div>
+            </aside>
+
+            <!-- PDF Viewer Section -->
+            <div class="pdf-viewer-section">
+                <div class="pdf-controls">
+                    <button id="prevPage" class="btn btn-nav" disabled>← Previous</button>
+                    <span class="page-info">
+                        Page <span id="pageNum">-</span> / <span id="pageCount">-</span>
+                    </span>
+                    <button id="nextPage" class="btn btn-nav" disabled>Next →</button>
+                    <div class="zoom-controls">
+                        <button id="zoomOut" class="btn btn-zoom">-</button>
+                        <span id="zoomLevel">100%</span>
+                        <button id="zoomIn" class="btn btn-zoom">+</button>
+                    </div>
+                </div>
+
+                <div class="pdf-container" id="pdfContainer">
+                    <canvas id="pdfCanvas"></canvas>
+                    <div id="textLayer" class="textLayer"></div>
+                </div>
+
+                <!-- EPUB Container -->
+                <div id="epubContainer" style="display: none;"></div>
+
+                <div class="welcome-message" id="welcomeMessage">
+                    <div class="welcome-content">
+                        <h2>Welcome! 👋</h2>
+                        <p>Upload a PDF or EPUB file to start reading</p>
+                        <p>Select text to get translations and grammar explanations</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vocabulary Panel -->
+            <aside class="vocab-panel">
+                <h2>📚 Vocabulary</h2>
+                <div class="vocab-stats">
+                    <span>Total: <strong id="vocabTotal">0</strong></span>
+                    <span>Today: <strong id="vocabToday">0</strong></span>
+                </div>
+                <div class="vocab-list" id="vocabList">
+                    <p style="color: #999; text-align: center; margin-top: 2rem;">No words saved yet</p>
+                </div>
+                <div class="vocab-actions">
+                    <button id="exportVocab" class="btn btn-secondary">💾 Export</button>
+                    <button id="clearVocab" class="btn" style="background: var(--danger-color);">🗑️ Clear</button>
+                </div>
+            </aside>
+        </main>
+
+        <!-- Translation Popup -->
+        <div id="translationPopup" class="popup hidden">
+            <div class="popup-header">
+                <h3>Translation & Grammar</h3>
+                <button id="closePopup" class="close-btn">×</button>
+            </div>
+            <div class="popup-content">
+                <div class="selected-text-section">
+                    <h4>Selected Text:</h4>
+                    <p id="selectedText" class="selected-text"></p>
+                </div>
+
+                <div class="translation-section">
+                    <h4>🌐 Translation (Korean):</h4>
+                    <p id="translationText" class="translation-text loading">Loading translation...</p>
+                </div>
+
+                <div class="grammar-section">
+                    <h4>📝 Grammar Explanation:</h4>
+                    <div id="grammarText" class="grammar-text loading">Analyzing grammar...</div>
+                </div>
+
+                <div class="popup-actions">
+                    <button id="addToVocabBtn" class="btn btn-secondary">➕ Add to Vocabulary</button>
+                    <button id="retranslateBtn" class="btn btn-secondary">🔄 Retry</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="loading-overlay hidden">
+            <div class="spinner"></div>
+            <p>Loading PDF...</p>
+        </div>
+    </div>
+
+    <!-- PDF.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        // Set PDF.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
+
+    <!-- EPUB.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/epubjs/0.3.93/epub.min.js"></script>
+
+    <script src="app.js"></script>
+</body>
+</html>
