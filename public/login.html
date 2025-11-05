@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Access - PDF Reader</title>
+    <title>Access / PDF Reader</title>
     <style>
         * {
             margin: 0;
@@ -11,96 +11,146 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --black: #000000;
+            --gray-900: #171717;
+            --gray-800: #333333;
+            --gray-600: #737373;
+            --gray-500: #a3a3a3;
+            --gray-300: #d4d4d4;
+            --gray-200: #e5e5e5;
+            --gray-100: #f5f5f5;
+            --gray-50: #fafafa;
+            --white: #ffffff;
+            --red: #ff0000;
+
+            --grid: 8px;
+            --space-1: calc(var(--grid) * 1);
+            --space-2: calc(var(--grid) * 2);
+            --space-3: calc(var(--grid) * 3);
+            --space-4: calc(var(--grid) * 4);
+            --space-6: calc(var(--grid) * 6);
+            --space-8: calc(var(--grid) * 8);
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            font-weight: 400;
+            color: var(--black);
+            background: var(--white);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 1rem;
+            display: grid;
+            place-items: center;
+            padding: var(--space-3);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         .container {
-            background: white;
-            padding: 3rem 2.5rem;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            background: var(--white);
+            border: 2px solid var(--black);
+            padding: var(--space-6);
             width: 100%;
-            max-width: 400px;
-            text-align: center;
+            max-width: 480px;
         }
 
         .logo {
-            margin-bottom: 2rem;
+            margin-bottom: var(--space-6);
+            text-align: left;
         }
 
         .logo h1 {
-            font-size: 2.5rem;
-            color: #667eea;
-            margin-bottom: 0.5rem;
+            font-size: 42px;
+            font-weight: 300;
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
+            color: var(--black);
+            margin-bottom: var(--space-1);
+            line-height: 1;
         }
 
         .logo p {
-            color: #666;
-            font-size: 1rem;
+            font-size: 11px;
+            color: var(--gray-600);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            font-weight: 500;
         }
 
         .form-group {
-            margin-bottom: 1.5rem;
-            text-align: left;
+            margin-bottom: var(--space-4);
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 0.5rem;
-            color: #333;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: var(--space-2);
             font-weight: 500;
+            color: var(--gray-800);
         }
 
         .form-group input {
             width: 100%;
-            padding: 0.875rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
+            padding: var(--space-2);
+            border: 1px solid var(--black);
+            background: var(--white);
+            font-size: 16px;
+            font-family: inherit;
+            color: var(--black);
+            transition: background 0.15s ease;
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: #667eea;
+            background: var(--gray-50);
+        }
+
+        .form-group input::placeholder {
+            color: var(--gray-300);
         }
 
         .submit-btn {
             width: 100%;
-            padding: 1rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            padding: var(--space-2);
+            background: var(--black);
+            color: var(--white);
             border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: 600;
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
             cursor: pointer;
-            transition: transform 0.2s ease;
+            transition: opacity 0.15s ease;
+            font-family: inherit;
         }
 
         .submit-btn:hover {
-            transform: translateY(-2px);
+            opacity: 0.85;
+        }
+
+        .submit-btn:active {
+            opacity: 0.7;
         }
 
         .submit-btn:disabled {
-            opacity: 0.6;
+            background: var(--gray-300);
+            color: var(--gray-600);
             cursor: not-allowed;
-            transform: none;
+            opacity: 1;
         }
 
         .error-message {
-            background: #fee;
-            color: #c33;
-            padding: 0.75rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
+            background: var(--gray-50);
+            border-left: 3px solid var(--red);
+            color: var(--gray-900);
+            padding: var(--space-2);
+            margin-bottom: var(--space-3);
+            font-size: 12px;
+            line-height: 1.4;
             display: none;
         }
 
@@ -109,18 +159,24 @@
         }
 
         .hint {
-            margin-top: 1.5rem;
-            color: #999;
-            font-size: 0.9rem;
+            margin-top: var(--space-4);
+            padding-top: var(--space-4);
+            border-top: 1px solid var(--gray-200);
+            color: var(--gray-500);
+            font-size: 10px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
         }
 
         @media (max-width: 480px) {
             .container {
-                padding: 2rem 1.5rem;
+                padding: var(--space-4);
+                border-width: 1px;
             }
 
             .logo h1 {
-                font-size: 2rem;
+                font-size: 32px;
             }
         }
     </style>
@@ -128,9 +184,8 @@
 <body>
     <div class="container">
         <div class="logo">
-            <h1>📚</h1>
-            <h1>PDF Reader</h1>
-            <p>Enter access code to continue</p>
+            <h1>Reader</h1>
+            <p>Access Required</p>
         </div>
 
         <div class="error-message" id="errorMessage"></div>
@@ -147,11 +202,11 @@
                     autofocus
                 >
             </div>
-            <button type="submit" class="submit-btn" id="accessBtn">🔓 Access</button>
+            <button type="submit" class="submit-btn" id="accessBtn">Enter</button>
         </form>
 
         <div class="hint">
-            🔒 Secure access with password protection
+            Swiss Typography System / 2025
         </div>
     </div>
 
@@ -175,7 +230,7 @@
             const btn = document.getElementById('accessBtn');
 
             btn.disabled = true;
-            btn.textContent = '🔓 Checking...';
+            btn.textContent = 'Checking...';
 
             try {
                 const response = await fetch('/api/access', {
@@ -187,21 +242,21 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    btn.textContent = '✅ Access Granted!';
+                    btn.textContent = 'Access Granted';
                     setTimeout(() => {
                         window.location.href = '/';
-                    }, 500);
+                    }, 300);
                 } else {
                     showError(data.error || 'Invalid access code');
                     btn.disabled = false;
-                    btn.textContent = '🔓 Access';
+                    btn.textContent = 'Enter';
                     document.getElementById('accessCode').value = '';
                     document.getElementById('accessCode').focus();
                 }
             } catch (error) {
                 showError('Network error. Please try again.');
                 btn.disabled = false;
-                btn.textContent = '🔓 Access';
+                btn.textContent = 'Enter';
             }
         }
 
