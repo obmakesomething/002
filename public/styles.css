@@ -1,3 +1,8 @@
+/* ========================================
+   SWISS GRAPHIC DESIGN SYSTEM
+   Minimalist, Grid-based, Typography-focused
+   ======================================== */
+
 * {
     margin: 0;
     padding: 0;
@@ -5,544 +10,170 @@
 }
 
 :root {
-    --primary-color: #4a90e2;
-    --secondary-color: #50c878;
-    --danger-color: #e74c3c;
-    --bg-color: #f5f7fa;
-    --card-bg: #ffffff;
-    --text-color: #2c3e50;
-    --border-color: #e1e8ed;
-    --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 5px 20px rgba(0, 0, 0, 0.15);
+    /* Swiss Design Color Palette - Monochrome + Red Accent */
+    --black: #000000;
+    --white: #ffffff;
+    --gray-100: #f5f5f5;
+    --gray-200: #e0e0e0;
+    --gray-300: #bdbdbd;
+    --gray-400: #9e9e9e;
+    --gray-500: #757575;
+    --gray-600: #616161;
+    --gray-700: #424242;
+    --gray-800: #212121;
+    --red: #ff0000;
+
+    /* Grid System */
+    --grid-unit: 8px;
+    --spacing-xs: calc(var(--grid-unit) * 1);
+    --spacing-sm: calc(var(--grid-unit) * 2);
+    --spacing-md: calc(var(--grid-unit) * 3);
+    --spacing-lg: calc(var(--grid-unit) * 4);
+    --spacing-xl: calc(var(--grid-unit) * 6);
 }
 
+/* Typography - Helvetica/Arial only */
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    line-height: 1.6;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--black);
+    background: var(--white);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 .container {
-    max-width: 100vw;
+    width: 100vw;
     height: 100vh;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: auto 1fr;
 }
 
-/* Header */
+/* ========================================
+   HEADER - Swiss Grid Layout
+   ======================================== */
+
 .header {
-    background: var(--card-bg);
-    padding: 1rem 2rem;
-    box-shadow: var(--shadow);
-    display: flex;
-    justify-content: space-between;
+    background: var(--white);
+    border-bottom: 1px solid var(--black);
+    padding: var(--spacing-md) var(--spacing-lg);
+    display: grid;
+    grid-template-columns: 1fr auto;
     align-items: center;
-    border-bottom: 2px solid var(--primary-color);
+    gap: var(--spacing-lg);
 }
 
 .header h1 {
-    font-size: 1.5rem;
-    color: var(--primary-color);
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    color: var(--black);
 }
 
 .controls {
     display: flex;
-    gap: 1rem;
+    gap: var(--spacing-sm);
     align-items: center;
-    flex-wrap: wrap;
 }
 
 .user-info {
-    font-weight: 600;
-    color: var(--primary-color);
-    padding: 0.5rem 1rem;
-    background: var(--bg-color);
-    border-radius: 5px;
+    font-size: 12px;
+    color: var(--gray-600);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border: 1px solid var(--gray-300);
+    font-weight: 400;
 }
 
+/* Buttons - Swiss Minimalist */
 .btn {
-    padding: 0.5rem 1.5rem;
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: 5px;
+    padding: var(--spacing-xs) var(--spacing-md);
+    background: var(--black);
+    color: var(--white);
+    border: 1px solid var(--black);
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     cursor: pointer;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
+    transition: all 0.15s ease;
 }
 
 .btn:hover {
-    background: #357abd;
-    transform: translateY(-1px);
-    box-shadow: var(--shadow);
+    background: var(--white);
+    color: var(--black);
 }
 
 .btn:disabled {
-    background: #ccc;
+    background: var(--gray-300);
+    border-color: var(--gray-300);
+    color: var(--gray-500);
     cursor: not-allowed;
-    transform: none;
 }
 
 .btn-secondary {
-    background: var(--secondary-color);
+    background: var(--white);
+    color: var(--black);
+    border: 1px solid var(--black);
 }
 
 .btn-secondary:hover {
-    background: #3da862;
+    background: var(--black);
+    color: var(--white);
 }
 
 #fileInput {
     display: none;
 }
 
-/* Main Content */
+/* ========================================
+   MAIN LAYOUT - Grid System
+   ======================================== */
+
 .main-content {
-    flex: 1;
     display: grid;
-    grid-template-columns: 250px 1fr 300px;
-    gap: 1rem;
-    padding: 1rem;
+    grid-template-columns: 200px 1fr 240px;
+    height: 100%;
     overflow: hidden;
 }
 
-/* Sidebar - Table of Contents */
+/* ========================================
+   SIDEBAR - Table of Contents
+   ======================================== */
+
 .sidebar {
-    background: var(--card-bg);
-    border-radius: 10px;
-    box-shadow: var(--shadow);
-    padding: 1.5rem;
+    background: var(--gray-100);
+    border-right: 1px solid var(--gray-300);
+    padding: var(--spacing-lg);
     overflow-y: auto;
 }
 
-.sidebar h2 {
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
-    color: var(--primary-color);
-}
-
-.toc-list {
-    list-style: none;
-}
-
-.toc-item {
-    padding: 0.5rem;
-    margin: 0.25rem 0;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background 0.2s ease;
-}
-
-.toc-item:hover {
-    background: var(--bg-color);
-}
-
-.toc-item.active {
-    background: var(--primary-color);
-    color: white;
-}
-
-.toc-item.level-2 {
-    padding-left: 1.5rem;
-    font-size: 0.9rem;
-}
-
-.toc-item.level-3 {
-    padding-left: 2.5rem;
-    font-size: 0.85rem;
-}
-
-/* PDF Viewer Section */
-.pdf-viewer-section {
-    background: var(--card-bg);
-    border-radius: 10px;
-    box-shadow: var(--shadow);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.pdf-controls {
-    padding: 1rem;
-    background: var(--bg-color);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.btn-nav, .btn-zoom {
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-}
-
-.page-info {
-    font-weight: 600;
-    padding: 0.5rem 1rem;
-    background: white;
-    border-radius: 5px;
-}
-
-.zoom-controls {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-#zoomLevel {
-    min-width: 50px;
-    text-align: center;
-    font-weight: 600;
-}
-
-.pdf-container {
-    flex: 1;
-    overflow: auto;
-    padding: 2rem;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    position: relative;
-    background: #f0f0f0;
-}
-
-#pdfCanvas {
-    box-shadow: var(--shadow-lg);
-    background: white;
-    max-width: 100%;
-}
-
-/* Text Layer for Selection */
-.textLayer {
-    position: absolute;
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    overflow: hidden;
-    opacity: 0.2;
-    line-height: 1.0;
-}
-
-.textLayer > span {
-    color: transparent;
-    position: absolute;
-    white-space: pre;
-    cursor: text;
-    transform-origin: 0% 0%;
-}
-
-.textLayer ::selection {
-    background: rgba(74, 144, 226, 0.3);
-}
-
-/* EPUB Container */
-#epubContainer {
-    flex: 1;
-    background: white;
-    box-shadow: var(--shadow-lg);
-    margin: 2rem auto;
-    max-width: 800px;
-    width: 100%;
-    overflow: auto;
-}
-
-/* Welcome Message */
-.welcome-message {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    color: #999;
-}
-
-.welcome-content h2 {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-}
-
-.welcome-content p {
-    font-size: 1.1rem;
-    margin: 0.5rem 0;
-}
-
-/* Vocabulary Panel */
-.vocab-panel {
-    background: var(--card-bg);
-    border-radius: 10px;
-    box-shadow: var(--shadow);
-    padding: 1.5rem;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-}
-
-.vocab-panel h2 {
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
-    color: var(--primary-color);
-}
-
-.vocab-stats {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.75rem;
-    background: var(--bg-color);
-    border-radius: 5px;
-    margin-bottom: 1rem;
-    font-size: 0.9rem;
-}
-
-.vocab-list {
-    flex: 1;
-    overflow-y: auto;
-}
-
-.vocab-item {
-    padding: 0.75rem;
-    margin: 0.5rem 0;
-    background: var(--bg-color);
-    border-radius: 5px;
-    border-left: 3px solid var(--primary-color);
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.vocab-item:hover {
-    transform: translateX(5px);
-    box-shadow: var(--shadow);
-}
-
-.vocab-word {
-    font-weight: 600;
-    color: var(--primary-color);
-    margin-bottom: 0.25rem;
-}
-
-.vocab-translation {
-    font-size: 0.9rem;
-    color: #666;
-}
-
-.vocab-actions {
-    margin-top: 1rem;
-    display: flex;
-    gap: 0.5rem;
-}
-
-.vocab-actions .btn {
-    flex: 1;
-    font-size: 0.85rem;
-    padding: 0.5rem;
-}
-
-/* Translation Popup */
-.popup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: var(--card-bg);
-    border-radius: 15px;
-    box-shadow: var(--shadow-lg);
-    width: 90%;
-    max-width: 600px;
-    max-height: 80vh;
-    overflow: hidden;
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-}
-
-.popup.hidden {
-    display: none;
-}
-
-.popup-header {
-    background: var(--primary-color);
-    color: white;
-    padding: 1rem 1.5rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.popup-header h3 {
-    font-size: 1.2rem;
-}
-
-.close-btn {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 2rem;
-    cursor: pointer;
-    line-height: 1;
-    padding: 0;
-    width: 30px;
-    height: 30px;
-}
-
-.close-btn:hover {
-    opacity: 0.8;
-}
-
-.popup-content {
-    padding: 1.5rem;
-    overflow-y: auto;
-    flex: 1;
-}
-
-.selected-text-section,
-.translation-section,
-.grammar-section {
-    margin-bottom: 1.5rem;
-}
-
-.selected-text-section h4,
-.translation-section h4,
-.grammar-section h4 {
-    font-size: 1rem;
-    margin-bottom: 0.5rem;
-    color: var(--primary-color);
-}
-
-.selected-text {
-    padding: 1rem;
-    background: var(--bg-color);
-    border-radius: 5px;
-    font-size: 1.1rem;
-    font-weight: 500;
-    line-height: 1.6;
-}
-
-.translation-text,
-.grammar-text {
-    padding: 1rem;
-    background: var(--bg-color);
-    border-radius: 5px;
-    line-height: 1.6;
-}
-
-.grammar-text ul {
-    margin-left: 1.5rem;
-    margin-top: 0.5rem;
-}
-
-.grammar-text li {
-    margin: 0.5rem 0;
-}
-
-.loading {
-    color: #999;
-    font-style: italic;
-}
-
-.popup-actions {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 1rem;
-}
-
-.popup-actions .btn {
-    flex: 1;
-}
-
-/* Loading Overlay */
-.loading-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 2000;
-    color: white;
-}
-
-.loading-overlay.hidden {
-    display: none;
-}
-
-.spinner {
-    width: 50px;
-    height: 50px;
-    border: 4px solid rgba(255, 255, 255, 0.3);
-    border-top-color: white;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-.loading-overlay p {
-    margin-top: 1rem;
-    font-size: 1.2rem;
-}
-
-/* Scrollbar Styling */
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: var(--bg-color);
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--primary-color);
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #357abd;
-}
-
-/* Responsive Design */
-@media (max-width: 1200px) {
-    .main-content {
-        grid-template-columns: 200px 1fr;
-    }
-
-    .vocab-panel {
-        display: none;
-    }
-}
-
-/* Sidebar Tabs & Bionic Settings */
 .sidebar-tabs {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-    border-bottom: 2px solid var(--border-color);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    margin-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--black);
 }
 
 .sidebar-tab {
-    flex: 1;
-    padding: 0.75rem 0.5rem;
+    padding: var(--spacing-sm) 0;
     background: none;
     border: none;
-    border-bottom: 3px solid transparent;
+    border-bottom: 2px solid transparent;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
     cursor: pointer;
-    font-size: 0.85rem;
-    transition: all 0.3s ease;
-    color: #666;
+    color: var(--gray-500);
+    transition: all 0.15s ease;
 }
 
 .sidebar-tab.active {
-    border-bottom-color: var(--primary-color);
-    color: var(--primary-color);
-    font-weight: 600;
+    border-bottom-color: var(--black);
+    color: var(--black);
 }
 
 .sidebar-content {
@@ -554,66 +185,476 @@ body {
 }
 
 .sidebar-content h3 {
-    font-size: 1rem;
-    margin-bottom: 1rem;
-    color: var(--text-color);
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--spacing-md);
 }
 
+/* TOC List */
+.toc-list {
+    list-style: none;
+}
+
+.toc-item {
+    padding: var(--spacing-xs) 0;
+    font-size: 12px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--gray-200);
+    transition: color 0.15s ease;
+}
+
+.toc-item:hover {
+    color: var(--red);
+}
+
+.toc-item.active {
+    font-weight: 500;
+    color: var(--red);
+}
+
+.toc-item.level-2 {
+    padding-left: var(--spacing-md);
+    font-size: 11px;
+}
+
+.toc-item.level-3 {
+    padding-left: calc(var(--spacing-md) * 2);
+    font-size: 10px;
+}
+
+/* Bionic Settings */
 .setting-group {
-    margin-bottom: 1.25rem;
+    margin-bottom: var(--spacing-lg);
 }
 
 .setting-group label {
     display: block;
-    font-size: 0.85rem;
-    margin-bottom: 0.5rem;
-    color: var(--text-color);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: var(--spacing-xs);
     font-weight: 500;
 }
 
 .setting-group input[type="range"] {
-    width: calc(100% - 40px);
-    margin-right: 0.5rem;
+    width: 100%;
+    margin: var(--spacing-xs) 0;
 }
 
 .setting-group span {
-    display: inline-block;
-    min-width: 35px;
-    text-align: right;
-    font-weight: 600;
-    color: var(--primary-color);
-    font-size: 0.85rem;
+    font-size: 11px;
+    color: var(--gray-600);
+    font-weight: 400;
 }
 
 .setting-group input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
+    width: 16px;
+    height: 16px;
 }
 
 .setting-group select {
     width: 100%;
-    padding: 0.5rem;
-    border: 2px solid var(--border-color);
-    border-radius: 5px;
-    font-size: 0.85rem;
-    background: white;
+    padding: var(--spacing-xs);
+    border: 1px solid var(--black);
+    background: var(--white);
+    font-size: 12px;
+    font-family: inherit;
+}
+
+/* ========================================
+   PDF VIEWER - Center Column
+   ======================================== */
+
+.pdf-viewer-section {
+    background: var(--white);
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--gray-300);
+}
+
+.pdf-controls {
+    padding: var(--spacing-md);
+    background: var(--gray-100);
+    border-bottom: 1px solid var(--gray-300);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.btn-nav {
+    min-width: 80px;
+}
+
+.page-info {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 0 var(--spacing-md);
+    color: var(--black);
+}
+
+.zoom-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.btn-zoom {
+    width: 32px;
+    padding: var(--spacing-xs);
+}
+
+#zoomLevel {
+    min-width: 48px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.pdf-container {
+    flex: 1;
+    overflow: auto;
+    padding: var(--spacing-xl);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    background: var(--gray-100);
+}
+
+#pdfCanvas {
+    box-shadow: 0 0 0 1px var(--gray-300);
+    background: var(--white);
+}
+
+.textLayer {
+    position: absolute;
+    opacity: 0;
+}
+
+.textLayer > span {
+    color: transparent;
+    position: absolute;
+    white-space: pre;
+    cursor: text;
+}
+
+.textLayer ::selection {
+    background: rgba(255, 0, 0, 0.2);
+}
+
+#epubContainer {
+    flex: 1;
+    background: var(--white);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.welcome-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.welcome-content h2 {
+    font-size: 24px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: var(--spacing-md);
+}
+
+.welcome-content p {
+    font-size: 12px;
+    color: var(--gray-600);
+    margin: var(--spacing-xs) 0;
+}
+
+/* ========================================
+   VOCABULARY PANEL
+   ======================================== */
+
+.vocab-panel {
+    background: var(--gray-100);
+    padding: var(--spacing-lg);
+    overflow-y: auto;
+}
+
+.vocab-panel h2 {
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--spacing-md);
+}
+
+.vocab-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm);
+    background: var(--white);
+    border: 1px solid var(--gray-300);
+    margin-bottom: var(--spacing-md);
+    font-size: 11px;
+}
+
+.vocab-list {
+    flex: 1;
+}
+
+.vocab-item {
+    padding: var(--spacing-sm);
+    margin: var(--spacing-xs) 0;
+    background: var(--white);
+    border: 1px solid var(--gray-300);
     cursor: pointer;
+    transition: border-color 0.15s ease;
 }
 
-.setting-group select:focus {
-    outline: none;
-    border-color: var(--primary-color);
+.vocab-item:hover {
+    border-color: var(--red);
 }
 
-/* Bionic Reading Styles */
+.vocab-word {
+    font-weight: 500;
+    font-size: 12px;
+    margin-bottom: var(--spacing-xs);
+}
+
+.vocab-translation {
+    font-size: 11px;
+    color: var(--gray-600);
+}
+
+.vocab-actions {
+    margin-top: var(--spacing-md);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-xs);
+}
+
+/* ========================================
+   TRANSLATION POPUP
+   ======================================== */
+
+.popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--white);
+    border: 2px solid var(--black);
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    z-index: 1000;
+}
+
+.popup.hidden {
+    display: none;
+}
+
+.popup-header {
+    background: var(--black);
+    color: var(--white);
+    padding: var(--spacing-md) var(--spacing-lg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.popup-header h3 {
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--white);
+    font-size: 24px;
+    cursor: pointer;
+    line-height: 1;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.popup-content {
+    padding: var(--spacing-lg);
+    overflow-y: auto;
+    max-height: calc(80vh - 80px);
+}
+
+.selected-text-section,
+.translation-section,
+.grammar-section {
+    margin-bottom: var(--spacing-lg);
+}
+
+.selected-text-section h4,
+.translation-section h4,
+.grammar-section h4 {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: var(--spacing-sm);
+    font-weight: 500;
+}
+
+.selected-text {
+    padding: var(--spacing-md);
+    background: var(--gray-100);
+    border-left: 2px solid var(--black);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.translation-text,
+.grammar-text {
+    padding: var(--spacing-md);
+    background: var(--gray-100);
+    border-left: 2px solid var(--red);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.grammar-text ul {
+    margin-left: var(--spacing-lg);
+    margin-top: var(--spacing-sm);
+}
+
+.grammar-text li {
+    margin: var(--spacing-xs) 0;
+    font-size: 12px;
+}
+
+.loading {
+    color: var(--gray-500);
+    font-style: italic;
+}
+
+.popup-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-sm);
+}
+
+/* ========================================
+   CONTEXT MENU
+   ======================================== */
+
+.context-menu {
+    position: fixed;
+    background: var(--white);
+    border: 2px solid var(--black);
+    min-width: 180px;
+    z-index: 2000;
+    display: none;
+}
+
+.context-menu.show {
+    display: block;
+}
+
+.context-menu-item {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 12px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--gray-200);
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.context-menu-item:last-child {
+    border-bottom: none;
+}
+
+.context-menu-item:hover {
+    background: var(--black);
+    color: var(--white);
+}
+
+.context-menu-separator {
+    height: 1px;
+    background: var(--black);
+    margin: var(--spacing-xs) 0;
+}
+
+/* ========================================
+   LOADING OVERLAY
+   ======================================== */
+
+.loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.95);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 3000;
+}
+
+.loading-overlay.hidden {
+    display: none;
+}
+
+.spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid var(--gray-200);
+    border-top-color: var(--black);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-overlay p {
+    margin-top: var(--spacing-md);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 500;
+}
+
+/* ========================================
+   BIONIC READING
+   ======================================== */
+
 .bionic-bold {
     font-weight: 700 !important;
-    transition: opacity 0.2s ease;
 }
 
 .bionic-text {
     font-weight: 400 !important;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 1200px) {
+    .main-content {
+        grid-template-columns: 180px 1fr;
+    }
+
+    .vocab-panel {
+        display: none;
+    }
 }
 
 @media (max-width: 768px) {
@@ -626,12 +667,33 @@ body {
     }
 
     .header {
-        flex-direction: column;
-        gap: 1rem;
+        grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
     }
 
-    .popup {
-        width: 95%;
-        max-height: 90vh;
+    .controls {
+        justify-content: space-between;
+        width: 100%;
     }
+}
+
+/* ========================================
+   SCROLLBAR - Swiss Minimalist
+   ======================================== */
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--gray-100);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--gray-400);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--black);
 }

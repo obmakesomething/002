@@ -99,8 +99,8 @@ function setupEventListeners() {
     elements.zoomInBtn.addEventListener('click', () => changeZoom(0.1));
     elements.zoomOutBtn.addEventListener('click', () => changeZoom(-0.1));
 
-    // Text selection
-    document.addEventListener('mouseup', handleTextSelection);
+    // Text selection - Disabled, using context menu instead
+    // document.addEventListener('mouseup', handleTextSelection);
 
     // Translation popup
     elements.closePopupBtn.addEventListener('click', closeTranslationPopup);
@@ -924,6 +924,103 @@ async function initializeApp() {
     if (authenticated) {
         setupBionicEventListeners();
         await syncVocabularyWithBackend();
+    }
+}
+
+// ================================
+// Context Menu
+// ================================
+
+const contextMenu = document.getElementById('contextMenu');
+let contextMenuSelectedText = '';
+
+// Prevent default context menu
+document.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+
+    // Check if text is selected
+    const selection = window.getSelection();
+    const selectedText = selection.toString().trim();
+
+    if (selectedText && selectedText.length > 0) {
+        contextMenuSelectedText = selectedText;
+
+        // Position context menu
+        contextMenu.style.left = e.pageX + 'px';
+        contextMenu.style.top = e.pageY + 'px';
+        contextMenu.classList.add('show');
+    } else {
+        contextMenu.classList.remove('show');
+    }
+});
+
+// Hide context menu on click outside
+document.addEventListener('click', (e) => {
+    if (!contextMenu.contains(e.target)) {
+        contextMenu.classList.remove('show');
+    }
+});
+
+// Context menu actions
+document.querySelectorAll('.context-menu-item').forEach(item => {
+    item.addEventListener('click', async () => {
+        const action = item.dataset.action;
+        contextMenu.classList.remove('show');
+
+        switch (action) {
+            case 'translate':
+                state.selectedText = contextMenuSelectedText;
+                showTranslationPopup(contextMenuSelectedText);
+                break;
+
+            case 'grammar':
+                state.selectedText = contextMenuSelectedText;
+                await loadGrammarExplanation(contextMenuSelectedText);
+                showTranslationPopup(contextMenuSelectedText);
+                break;
+
+            case 'highlight-yellow':
+                highlightSelection('#ffeb3b');
+                break;
+
+            case 'highlight-red':
+                highlightSelection('#ff5252');
+                break;
+
+            case 'highlight-green':
+                highlightSelection('#69f0ae');
+                break;
+
+            case 'add-vocab':
+                if (contextMenuSelectedText) {
+                    state.selectedText = contextMenuSelectedText;
+                    await loadTranslation(contextMenuSelectedText);
+                    await loadGrammarExplanation(contextMenuSelectedText);
+                    await addToVocabularyWithBackend();
+                }
+                break;
+
+            case 'copy':
+                navigator.clipboard.writeText(contextMenuSelectedText);
+                break;
+        }
+    });
+});
+
+function highlightSelection(color) {
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        const span = document.createElement('span');
+        span.style.backgroundColor = color;
+        span.style.padding = '2px 0';
+
+        try {
+            range.surroundContents(span);
+        } catch (e) {
+            // If can't wrap (crosses boundaries), just mark for now
+            console.log('Could not highlight:', e);
+        }
     }
 }
 
