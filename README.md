@@ -69,6 +69,46 @@ A comprehensive web-based reading application with translation, grammar explanat
    http://localhost:3000
    ```
 
+## 🌐 Deploy to Railway.app
+
+### Quick Deploy (Recommended)
+
+Railway.app 배포는 매우 쉽습니다! 아래 단계를 따라하세요:
+
+1. **Railway 계정 생성**
+   - [Railway.app](https://railway.app)에서 GitHub으로 로그인
+
+2. **프로젝트 배포**
+   - "New Project" → "Deploy from GitHub repo"
+   - 이 저장소 선택: `obmakesomething/002`
+   - 브랜치: `claude/pdf-reader-translator-011CUpbHwwWRm27xQSEgmgEh`
+
+3. **환경 변수 설정** (중요!)
+   - Railway 대시보드에서 "Variables" 클릭
+   - 추가할 변수:
+     ```bash
+     SESSION_SECRET=your-random-secret-key-here
+     ```
+   - SESSION_SECRET 생성: [RandomKeygen.com](https://randomkeygen.com/)
+
+4. **배포 완료!**
+   - 자동으로 빌드 및 배포 시작
+   - 몇 분 후 URL 확인: `https://your-app.up.railway.app`
+
+### 상세 배포 가이드
+
+Railway 배포 상세 가이드는 [DEPLOY.md](DEPLOY.md) 문서를 참고하세요:
+- 데이터베이스 백업
+- 커스텀 도메인 연결
+- 모니터링 및 로그 확인
+- 문제 해결 방법
+
+### Railway 무료 티어
+- 💰 월 $5 크레딧 (약 500시간)
+- 💾 1 GB 디스크
+- 🚀 자동 HTTPS
+- 🔄 GitHub push 시 자동 재배포
+
 ## 📚 How to Use
 
 ### 1. Create an Account
