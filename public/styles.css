@@ -718,24 +718,248 @@ body {
     }
 }
 
+/* ========================================
+   MOBILE OPTIMIZATION - iPhone 16 Pro & iOS
+   ======================================== */
+
 @media (max-width: 768px) {
-    .main-content {
-        grid-template-columns: 1fr;
+    /* Safe Area Support for iPhone notch/Dynamic Island */
+    body {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
     }
 
-    .sidebar {
-        display: none;
+    .container {
+        height: 100dvh; /* Dynamic viewport height for mobile browsers */
     }
 
+    /* Header - Mobile Optimized */
     .header {
         grid-template-columns: 1fr;
         gap: var(--space-2);
+        padding: var(--space-2) var(--space-3);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+
+    .header h1 {
+        font-size: var(--scale-base);
+        letter-spacing: 0.05em;
     }
 
     .controls {
         justify-self: start;
         width: 100%;
         flex-wrap: wrap;
+        gap: var(--space-1);
+    }
+
+    /* Touch-optimized buttons - minimum 44x44px */
+    .btn {
+        padding: var(--space-2) var(--space-3);
+        font-size: var(--scale--1);
+        min-height: 44px;
+        touch-action: manipulation;
+    }
+
+    .btn-secondary {
+        min-height: 44px;
+    }
+
+    .user-info {
+        font-size: 10px;
+        padding: var(--space-1) var(--space-2);
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+
+    /* Main Layout - Mobile Stack */
+    .main-content {
+        grid-template-columns: 1fr;
+        height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    }
+
+    .sidebar {
+        display: none;
+    }
+
+    /* PDF Controls - Mobile Touch Targets */
+    .pdf-controls {
+        padding: var(--space-2);
+        gap: var(--space-2);
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+
+    .btn-nav {
+        min-width: 100px;
+        min-height: 44px;
+        font-size: var(--scale--1);
+    }
+
+    .page-info {
+        font-size: var(--scale-base);
+        order: 3;
+        flex-basis: 100%;
+        text-align: center;
+        padding: var(--space-1) 0;
+    }
+
+    .zoom-controls {
+        gap: var(--space-2);
+    }
+
+    .btn-zoom {
+        width: 44px;
+        height: 44px;
+        font-size: var(--scale-1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #zoomLevel {
+        min-width: 64px;
+        font-size: var(--scale-base);
+    }
+
+    /* PDF Container - Mobile Optimized */
+    .pdf-container {
+        padding: var(--space-2);
+    }
+
+    #pdfCanvas {
+        max-width: 100%;
+        height: auto !important;
+    }
+
+    /* Context Menu - Mobile Touch Optimized */
+    .context-menu {
+        min-width: 240px;
+        max-width: 85vw;
+        border-width: 2px;
+    }
+
+    .context-menu-item {
+        padding: var(--space-3);
+        font-size: var(--scale-base);
+        min-height: 56px;
+        display: flex;
+        align-items: center;
+        touch-action: manipulation;
+    }
+
+    /* Translation Popup - Mobile Full Screen */
+    .popup {
+        width: 100vw;
+        height: 100dvh;
+        max-width: 100vw;
+        max-height: 100dvh;
+        top: 0;
+        left: 0;
+        transform: none;
+        border: none;
+        border-radius: 0;
+    }
+
+    .popup-header {
+        padding: var(--space-3);
+        padding-top: calc(var(--space-3) + env(safe-area-inset-top));
+        min-height: 64px;
+    }
+
+    .popup-header h3 {
+        font-size: var(--scale-1);
+    }
+
+    .close-btn {
+        width: 44px;
+        height: 44px;
+        font-size: 32px;
+    }
+
+    .popup-content {
+        padding: var(--space-3);
+        max-height: calc(100dvh - 64px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+        padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
+    }
+
+    .selected-text,
+    .translation-text,
+    .grammar-text {
+        font-size: var(--scale-base);
+        padding: var(--space-3);
+        line-height: 1.7;
+    }
+
+    .popup-actions {
+        grid-template-columns: 1fr;
+        gap: var(--space-2);
+        position: sticky;
+        bottom: 0;
+        background: var(--white);
+        padding-top: var(--space-2);
+    }
+
+    .popup-actions .btn {
+        width: 100%;
+        min-height: 52px;
+        font-size: var(--scale-base);
+    }
+
+    /* Welcome Message - Mobile */
+    .welcome-content h2 {
+        font-size: var(--scale-2);
+    }
+
+    .welcome-content p {
+        font-size: var(--scale--1);
+    }
+
+    /* Loading Overlay - Safe Area */
+    .loading-overlay {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    /* Prevent overscroll bounce on iOS */
+    .pdf-container,
+    .popup-content,
+    .sidebar {
+        overscroll-behavior: contain;
+    }
+
+    /* Improve tap highlight */
+    * {
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0.05);
+    }
+}
+
+/* Ultra-compact for small phones (<375px) */
+@media (max-width: 375px) {
+    :root {
+        --scale-base: 13px;
+    }
+
+    .header {
+        padding: var(--space-1) var(--space-2);
+    }
+
+    .header h1 {
+        font-size: var(--scale--1);
+    }
+
+    .controls {
+        gap: 6px;
+    }
+
+    .btn {
+        padding: var(--space-1) var(--space-2);
+        font-size: 10px;
     }
 }
 
