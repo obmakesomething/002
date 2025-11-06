@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const path = require('path');
 const multer = require('multer');
 const cors = require('cors');
+const fs = require('fs');
 require('dotenv').config();
 
 const db = require('./database');
@@ -402,10 +403,85 @@ app.get('/api/stats', isAuthenticated, (req, res) => {
 });
 
 // ================================
+// Auto-import Books from Books_Collection
+// ================================
+
+function autoImportBooks() {
+    const booksDir = path.join(__dirname, 'Books_Collection');
+
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(booksDir)) {
+        fs.mkdirSync(booksDir, { recursive: true });
+        console.log('📁 Created Books_Collection folder');
+        return;
+    }
+
+    try {
+        const files = fs.readdirSync(booksDir);
+        const bookFiles = files.filter(file => {
+            const ext = path.extname(file).toLowerCase();
+            return ext === '.pdf' || ext === '.epub';
+        });
+
+        if (bookFiles.length === 0) {
+            console.log('📚 No books found in Books_Collection folder');
+            return;
+        }
+
+        console.log(`📚 Found ${bookFiles.length} book(s) in Books_Collection`);
+
+        // Get existing books to avoid duplicates
+        const existingBooks = db.getBooksByUserId(1);
+        const existingFileNames = new Set(existingBooks.map(book => {
+            // Extract original filename from stored path
+            return path.basename(book.file_path).replace(/^\d+-\d+-/, '');
+        }));
+
+        bookFiles.forEach(file => {
+            if (existingFileNames.has(file)) {
+                console.log(`  ⏭️  Skipping ${file} (already imported)`);
+                return;
+            }
+
+            const filePath = path.join(booksDir, file);
+            const stats = fs.statSync(filePath);
+            const ext = path.extname(file).toLowerCase();
+            const mimeType = ext === '.pdf' ? 'application/pdf' : 'application/epub+zip';
+
+            // Copy to uploads folder with unique name
+            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+            const newFileName = `${uniqueSuffix}-${file}`;
+            const uploadPath = path.join(__dirname, 'uploads', newFileName);
+
+            fs.copyFileSync(filePath, uploadPath);
+
+            // Add to database
+            const bookId = db.createBook(
+                1, // Single user system
+                file,
+                newFileName,
+                mimeType,
+                stats.size
+            );
+
+            console.log(`  ✅ Imported: ${file} (ID: ${bookId})`);
+        });
+
+    } catch (error) {
+        console.error('❌ Error importing books:', error);
+    }
+}
+
+// ================================
 // Start Server
 // ================================
 
 app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
     console.log(`📚 PDF/EPUB Reader with Translator`);
+
+    // Auto-import books on startup
+    setTimeout(() => {
+        autoImportBooks();
+    }, 1000);
 });

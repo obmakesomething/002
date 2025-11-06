@@ -31,6 +31,12 @@
     --white: #ffffff;
     --red: #ff0000;
 
+    /* Border Radius */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+
     /* Modular Scale - Major Third (1.250) */
     --scale-base: 14px;
     --scale-1: calc(var(--scale-base) * 1.250);      /* 17.5px */
@@ -117,6 +123,7 @@ body {
     color: var(--gray-600);
     padding: var(--space-1) var(--space-2);
     border: 1px solid var(--gray-300);
+    border-radius: var(--radius-md);
     font-weight: 400;
     letter-spacing: 0.01em;
 }
@@ -127,6 +134,7 @@ body {
     background: var(--black);
     color: var(--white);
     border: none;
+    border-radius: var(--radius-md);
     font-size: var(--scale--1);
     font-weight: 500;
     text-transform: uppercase;
@@ -242,8 +250,9 @@ body {
     margin-bottom: var(--space-1);
     background: var(--white);
     border: 1px solid var(--gray-300);
+    border-radius: var(--radius-lg);
     cursor: pointer;
-    transition: border-color 0.15s ease;
+    transition: all 0.15s ease;
 }
 
 .book-item:hover {
@@ -355,6 +364,7 @@ body {
     width: 100%;
     padding: var(--space-1);
     border: 1px solid var(--gray-800);
+    border-radius: var(--radius-sm);
     background: var(--white);
     font-size: var(--scale--1);
     font-family: inherit;
@@ -425,6 +435,7 @@ body {
 
 #pdfCanvas {
     box-shadow: 0 0 0 1px var(--gray-300);
+    border-radius: var(--radius-md);
     background: var(--white);
 }
 
@@ -503,6 +514,7 @@ body {
     padding: var(--space-2);
     background: var(--white);
     border: 1px solid var(--gray-300);
+    border-radius: var(--radius-md);
     margin-bottom: var(--space-3);
     font-size: var(--scale--2);
     font-variant-numeric: tabular-nums;
@@ -517,6 +529,7 @@ body {
     margin: var(--space-1) 0;
     background: var(--white);
     border: 1px solid var(--gray-300);
+    border-radius: var(--radius-lg);
     cursor: pointer;
     transition: border-color 0.15s ease;
 }
@@ -556,11 +569,13 @@ body {
     transform: translate(-50%, -50%);
     background: var(--white);
     border: 2px solid var(--black);
+    border-radius: var(--radius-xl);
     width: 90%;
     max-width: 640px;
     max-height: 85vh;
     z-index: 1000;
     box-shadow: 0 var(--space-1) var(--space-4) rgba(0, 0, 0, 0.15);
+    overflow: hidden;
 }
 
 .popup.hidden {
@@ -675,10 +690,12 @@ body {
     position: fixed;
     background: var(--white);
     border: 2px solid var(--black);
+    border-radius: var(--radius-lg);
     min-width: 192px;
     z-index: 2000;
     display: none;
     box-shadow: 0 var(--space-1) var(--space-3) rgba(0, 0, 0, 0.15);
+    overflow: hidden;
 }
 
 .context-menu.show {
@@ -959,6 +976,10 @@ body {
         transform: none;
         border: none;
         border-radius: 0;
+    }
+
+    .context-menu {
+        border-radius: var(--radius-xl);
     }
 
     .popup-header {
