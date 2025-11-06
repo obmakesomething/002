@@ -11,31 +11,41 @@
 }
 
 :root {
-    /* Swiss Grayscale Palette - Mathematically Balanced */
-    --black: #000000;
-    --gray-950: #0a0a0a;
-    --gray-900: #171717;
-    --gray-850: #262626;
-    --gray-800: #333333;
-    --gray-750: #404040;
-    --gray-700: #525252;
-    --gray-650: #6b6b6b;
-    --gray-600: #737373;
-    --gray-550: #8a8a8a;
-    --gray-500: #a3a3a3;
-    --gray-400: #b5b5b5;
-    --gray-300: #d4d4d4;
-    --gray-200: #e5e5e5;
-    --gray-100: #f5f5f5;
-    --gray-50: #fafafa;
-    --white: #ffffff;
-    --red: #ff0000;
+    /* Apple iOS Color System */
+    --system-blue: #007AFF;
+    --system-blue-dark: #0051D5;
+    --system-red: #FF3B30;
+    --system-green: #34C759;
+    --system-yellow: #FFCC00;
+    --system-orange: #FF9500;
+    --system-purple: #AF52DE;
 
-    /* Border Radius */
-    --radius-sm: 4px;
-    --radius-md: 8px;
-    --radius-lg: 12px;
-    --radius-xl: 16px;
+    /* System Grays (iOS) */
+    --system-gray: #8E8E93;
+    --system-gray-2: #AEAEB2;
+    --system-gray-3: #C7C7CC;
+    --system-gray-4: #D1D1D6;
+    --system-gray-5: #E5E5EA;
+    --system-gray-6: #F2F2F7;
+
+    /* Backgrounds */
+    --background-primary: #F2F2F7;
+    --background-secondary: #FFFFFF;
+    --background-tertiary: #FAFAFA;
+    --background-elevated: #FFFFFF;
+
+    /* Text Colors */
+    --label-primary: #000000;
+    --label-secondary: #3C3C43;
+    --label-tertiary: #3C3C4399;
+    --label-quaternary: #3C3C4366;
+
+    /* Border Radius (Apple HIG) */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-modal: 24px;
 
     /* Modular Scale - Major Third (1.250) */
     --scale-base: 14px;
@@ -59,14 +69,14 @@
     --space-10: calc(var(--grid) * 10); /* 80px */
 }
 
-/* Typography - Helvetica Neue Only */
+/* Typography - SF Pro / System UI */
 body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-size: var(--scale-base);
-    line-height: 1.5;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', system-ui, 'Segoe UI', Roboto, sans-serif;
+    font-size: 17px;
+    line-height: 1.47;
     font-weight: 400;
-    color: var(--black);
-    background: var(--white);
+    color: var(--label-primary);
+    background: var(--background-primary);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
@@ -83,13 +93,16 @@ body {
    ======================================== */
 
 .header {
-    background: var(--white);
-    border-bottom: 1px solid var(--black);
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid var(--system-gray-5);
     padding: var(--space-3) var(--space-4);
     display: grid;
     grid-template-columns: auto 1fr;
     align-items: center;
     gap: var(--space-4);
+    box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.05);
 }
 
 .header-left {
@@ -103,12 +116,11 @@ body {
 }
 
 .header h1 {
-    font-size: var(--scale-2);
-    font-weight: 500;
-    letter-spacing: -0.02em;
-    text-transform: uppercase;
-    color: var(--black);
-    line-height: 1;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    color: var(--label-primary);
+    line-height: 1.2;
 }
 
 .controls {
@@ -119,54 +131,61 @@ body {
 }
 
 .user-info {
-    font-size: var(--scale--1);
-    color: var(--gray-600);
-    padding: var(--space-1) var(--space-2);
-    border: 1px solid var(--gray-300);
-    border-radius: var(--radius-md);
-    font-weight: 400;
-    letter-spacing: 0.01em;
-}
-
-/* Buttons - Swiss Minimalism */
-.btn {
-    padding: var(--space-1) var(--space-3);
-    background: var(--black);
-    color: var(--white);
+    font-size: 15px;
+    color: var(--label-secondary);
+    padding: 8px 12px;
+    background: var(--system-gray-6);
     border: none;
     border-radius: var(--radius-md);
-    font-size: var(--scale--1);
     font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+}
+
+/* Buttons - Apple iOS Style */
+.btn {
+    padding: 10px 20px;
+    background: var(--system-blue);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.4px;
     cursor: pointer;
-    transition: opacity 0.15s ease;
-    line-height: 1;
+    transition: all 0.2s ease;
+    line-height: 1.2;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .btn:hover {
-    opacity: 0.85;
+    background: var(--system-blue-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
 }
 
 .btn:active {
-    opacity: 0.7;
+    transform: scale(0.98);
 }
 
 .btn:disabled {
-    background: var(--gray-300);
-    color: var(--gray-500);
+    background: var(--system-gray-4);
+    color: var(--system-gray);
     cursor: not-allowed;
-    opacity: 1;
+    opacity: 0.6;
+    transform: none;
+    box-shadow: none;
 }
 
 .btn-secondary {
-    background: var(--white);
-    color: var(--black);
-    border: 1px solid var(--black);
+    background: var(--system-gray-6);
+    color: var(--system-blue);
+    border: none;
+    box-shadow: none;
 }
 
 .btn-secondary:hover {
-    background: var(--gray-50);
+    background: var(--system-gray-5);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 #fileInput {
@@ -190,10 +209,11 @@ body {
    ======================================== */
 
 .sidebar {
-    background: var(--gray-50);
-    border-right: 1px solid var(--gray-300);
+    background: var(--background-secondary);
+    border-right: 1px solid var(--system-gray-5);
     padding: var(--space-3);
     overflow-y: auto;
+    box-shadow: 1px 0 0 0 rgba(0, 0, 0, 0.05);
 }
 
 .sidebar-tabs {
@@ -246,23 +266,36 @@ body {
 }
 
 .book-item {
-    padding: var(--space-2);
-    margin-bottom: var(--space-1);
-    background: var(--white);
-    border: 1px solid var(--gray-300);
+    padding: 16px;
+    margin-bottom: 12px;
+    background: var(--background-secondary);
+    border: 1px solid var(--system-gray-5);
     border-radius: var(--radius-lg);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .book-item:hover {
-    border-color: var(--black);
-    background: var(--gray-50);
+    border-color: var(--system-blue);
+    background: var(--background-secondary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .book-item.active {
-    border-color: var(--black);
-    background: var(--gray-50);
+    border-color: var(--system-blue);
+    background: var(--system-blue);
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+}
+
+.book-item.active .book-title {
+    color: white;
+}
+
+.book-item.active .book-meta {
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .book-title {
@@ -567,14 +600,14 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: var(--white);
-    border: 2px solid var(--black);
-    border-radius: var(--radius-xl);
+    background: var(--background-secondary);
+    border: none;
+    border-radius: var(--radius-modal);
     width: 90%;
     max-width: 640px;
     max-height: 85vh;
     z-index: 1000;
-    box-shadow: 0 var(--space-1) var(--space-4) rgba(0, 0, 0, 0.15);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 0 1px rgba(0, 0, 0, 0.1);
     overflow: hidden;
 }
 
@@ -583,19 +616,19 @@ body {
 }
 
 .popup-header {
-    background: var(--black);
-    color: var(--white);
-    padding: var(--space-2) var(--space-3);
+    background: var(--system-gray-6);
+    color: var(--label-primary);
+    padding: 20px 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-bottom: 1px solid var(--system-gray-5);
 }
 
 .popup-header h3 {
-    font-size: var(--scale-1);
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
 }
 
 .close-btn {
@@ -688,13 +721,15 @@ body {
 
 .context-menu {
     position: fixed;
-    background: var(--white);
-    border: 2px solid var(--black);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: none;
     border-radius: var(--radius-lg);
-    min-width: 192px;
+    min-width: 220px;
     z-index: 2000;
     display: none;
-    box-shadow: 0 var(--space-1) var(--space-3) rgba(0, 0, 0, 0.15);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2), 0 0 1px rgba(0, 0, 0, 0.1);
     overflow: hidden;
 }
 
@@ -703,15 +738,16 @@ body {
 }
 
 .context-menu-item {
-    padding: var(--space-2) var(--space-3);
-    font-size: var(--scale--1);
+    padding: 14px 16px;
+    font-size: 17px;
     cursor: pointer;
-    border-bottom: 1px solid var(--gray-200);
+    border-bottom: 1px solid var(--system-gray-5);
     transition: all 0.15s ease;
     display: flex;
     align-items: center;
-    gap: var(--space-2);
+    gap: 12px;
     font-weight: 400;
+    color: var(--label-primary);
 }
 
 .context-menu-item:last-child {
@@ -719,8 +755,8 @@ body {
 }
 
 .context-menu-item:hover {
-    background: var(--black);
-    color: var(--white);
+    background: var(--system-blue);
+    color: white;
 }
 
 .context-menu-separator {
