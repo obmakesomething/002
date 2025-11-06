@@ -83,7 +83,15 @@ app.post('/api/access', (req, res) => {
         if (accessCode === ACCESS_CODE) {
             req.session.authenticated = true;
             req.session.userId = 1; // Single user system
-            res.json({ message: 'Access granted' });
+
+            // Save session before responding
+            req.session.save((err) => {
+                if (err) {
+                    console.error('Session save error:', err);
+                    return res.status(500).json({ error: 'Session save failed' });
+                }
+                res.json({ message: 'Access granted' });
+            });
         } else {
             res.status(401).json({ error: 'Invalid access code' });
         }

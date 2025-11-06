@@ -8,14 +8,20 @@
 </head>
 <body>
     <div class="container">
+        <!-- Sidebar Overlay for Mobile -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
         <!-- Header -->
         <header class="header">
-            <h1>📚 PDF Reader & Translator</h1>
+            <div class="header-left">
+                <button id="menuToggle" class="btn btn-secondary mobile-only">☰ Menu</button>
+                <h1>📚 Reader</h1>
+            </div>
             <div class="controls">
                 <span id="userInfo" class="user-info"></span>
-                <button id="bionicToggle" class="btn btn-secondary">🧠 Bionic Reading</button>
+                <button id="bionicToggle" class="btn btn-secondary">🧠 Bionic</button>
                 <input type="file" id="fileInput" accept=".pdf,.epub" />
-                <button id="uploadBtn" class="btn">📁 Upload PDF/EPUB</button>
+                <button id="uploadBtn" class="btn">📁 Upload</button>
                 <button id="logoutBtn" class="btn" style="background: #e74c3c;">Logout</button>
             </div>
         </header>
@@ -25,11 +31,20 @@
             <!-- Sidebar - Table of Contents & Settings -->
             <aside class="sidebar">
                 <div class="sidebar-tabs">
-                    <button class="sidebar-tab active" data-tab="toc">📑 TOC</button>
-                    <button class="sidebar-tab" data-tab="bionic">🧠 Bionic</button>
+                    <button class="sidebar-tab active" data-tab="books">📚 Books</button>
+                    <button class="sidebar-tab" data-tab="toc">📑 TOC</button>
+                    <button class="sidebar-tab" data-tab="bionic">⚙️</button>
                 </div>
 
-                <div class="sidebar-content active" id="tocContent">
+                <div class="sidebar-content active" id="booksContent">
+                    <h3>My Library</h3>
+                    <div id="booksList" class="books-list">
+                        <p style="color: #999; text-align: center; margin-top: 2rem; font-size: 11px;">Loading books...</p>
+                    </div>
+                </div>
+
+                <div class="sidebar-content" id="tocContent">
+                    <h3>Table of Contents</h3>
                     <ul id="tocList" class="toc-list">
                         <li class="toc-item" style="color: #999;">No content loaded</li>
                     </ul>

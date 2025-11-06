@@ -74,6 +74,18 @@ const elements = {
     exportVocabBtn: document.getElementById('exportVocab'),
     clearVocabBtn: document.getElementById('clearVocab'),
 
+    // Books list
+    booksList: document.getElementById('booksList'),
+
+    // Mobile menu
+    menuToggle: document.getElementById('menuToggle'),
+    sidebar: document.querySelector('.sidebar'),
+    sidebarOverlay: document.getElementById('sidebarOverlay'),
+
+    // User info
+    userInfo: document.getElementById('userInfo'),
+    logoutBtn: document.getElementById('logoutBtn'),
+
     // Loading overlay
     loadingOverlay: document.getElementById('loadingOverlay')
 };
@@ -110,6 +122,27 @@ function setupEventListeners() {
     // Vocabulary actions
     elements.exportVocabBtn.addEventListener('click', exportVocabulary);
     elements.clearVocabBtn.addEventListener('click', clearVocabulary);
+
+    // Sidebar tabs
+    document.querySelectorAll('.sidebar-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            const tabName = tab.dataset.tab;
+            switchSidebarTab(tabName);
+        });
+    });
+
+    // Mobile menu toggle
+    if (elements.menuToggle) {
+        elements.menuToggle.addEventListener('click', toggleMobileMenu);
+    }
+    if (elements.sidebarOverlay) {
+        elements.sidebarOverlay.addEventListener('click', closeMobileMenu);
+    }
+
+    // Logout
+    if (elements.logoutBtn) {
+        elements.logoutBtn.addEventListener('click', logout);
+    }
 }
 
 // ================================
@@ -924,6 +957,131 @@ async function initializeApp() {
     if (authenticated) {
         setupBionicEventListeners();
         await syncVocabularyWithBackend();
+        await loadBooksList();
+    }
+}
+
+// ================================
+// Sidebar Functions
+// ================================
+
+function switchSidebarTab(tabName) {
+    // Update tab buttons
+    document.querySelectorAll('.sidebar-tab').forEach(tab => {
+        tab.classList.remove('active');
+        if (tab.dataset.tab === tabName) {
+            tab.classList.add('active');
+        }
+    });
+
+    // Update content sections
+    document.querySelectorAll('.sidebar-content').forEach(content => {
+        content.classList.remove('active');
+    });
+
+    const targetContent = document.getElementById(`${tabName}Content`);
+    if (targetContent) {
+        targetContent.classList.add('active');
+    }
+}
+
+function toggleMobileMenu() {
+    elements.sidebar.classList.toggle('show');
+    elements.sidebarOverlay.classList.toggle('show');
+}
+
+function closeMobileMenu() {
+    elements.sidebar.classList.remove('show');
+    elements.sidebarOverlay.classList.remove('show');
+}
+
+// ================================
+// Books List Functions
+// ================================
+
+async function loadBooksList() {
+    try {
+        const response = await fetch('/api/books');
+        if (!response.ok) {
+            throw new Error('Failed to load books');
+        }
+
+        const books = await response.json();
+        displayBooksList(books);
+    } catch (error) {
+        console.error('Load books error:', error);
+        elements.booksList.innerHTML = '<p style="color: #999; text-align: center; margin-top: 2rem; font-size: 11px;">Failed to load books</p>';
+    }
+}
+
+function displayBooksList(books) {
+    if (!books || books.length === 0) {
+        elements.booksList.innerHTML = '<p style="color: #999; text-align: center; margin-top: 2rem; font-size: 11px;">No books yet. Upload one to get started!</p>';
+        return;
+    }
+
+    elements.booksList.innerHTML = books.map(book => {
+        const fileType = book.file_type === 'application/pdf' ? 'PDF' : 'EPUB';
+        const fileSize = (book.file_size / 1024 / 1024).toFixed(2);
+        const uploadDate = new Date(book.uploaded_at).toLocaleDateString('ko-KR');
+
+        return `
+            <div class="book-item" data-book-id="${book.id}" data-file-path="${book.file_path}">
+                <div class="book-title">${book.title}</div>
+                <div class="book-meta">
+                    <span class="book-type">${fileType}</span>
+                    <span>${fileSize} MB</span>
+                </div>
+                <div class="book-meta" style="margin-top: 4px;">
+                    <span style="font-size: 8px; color: var(--gray-500);">${uploadDate}</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    // Add click handlers to book items
+    document.querySelectorAll('.book-item').forEach(item => {
+        item.addEventListener('click', async () => {
+            const bookId = item.dataset.bookId;
+            const filePath = item.dataset.filePath;
+            await loadBookFromServer(bookId, filePath);
+            closeMobileMenu();
+        });
+    });
+}
+
+async function loadBookFromServer(bookId, filePath) {
+    try {
+        showLoading();
+
+        // Fetch the book file
+        const response = await fetch(`/uploads/${filePath}`);
+        if (!response.ok) {
+            throw new Error('Failed to load book file');
+        }
+
+        const blob = await response.blob();
+        const file = new File([blob], filePath, { type: blob.type });
+
+        // Load the book
+        await handleFile(file);
+
+        // Mark as active
+        document.querySelectorAll('.book-item').forEach(item => {
+            item.classList.remove('active');
+            if (item.dataset.bookId === bookId) {
+                item.classList.add('active');
+            }
+        });
+
+        // Switch to TOC tab
+        switchSidebarTab('toc');
+
+        hideLoading();
+    } catch (error) {
+        console.error('Load book from server error:', error);
+        alert('Failed to load book: ' + error.message);
+        hideLoading();
     }
 }
 
