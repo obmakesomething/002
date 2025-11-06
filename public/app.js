@@ -155,24 +155,89 @@ async function handleFileSelect(event) {
 
     const fileName = file.name.toLowerCase();
 
+    if (!fileName.endsWith('.pdf') && !fileName.endsWith('.epub')) {
+        alert('Please select a PDF or EPUB file');
+        return;
+    }
+
     showLoading(true);
 
     try {
-        if (fileName.endsWith('.pdf')) {
-            await loadPDF(file);
-        } else if (fileName.endsWith('.epub')) {
-            await loadEPUB(file);
-        } else {
-            alert('Please select a PDF or EPUB file');
+        // Step 1: Upload to server
+        const formData = new FormData();
+        formData.append('book', file);
+
+        const uploadResponse = await fetch('/api/books/upload', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!uploadResponse.ok) {
+            const error = await uploadResponse.json();
+            throw new Error(error.error || 'Upload failed');
         }
 
+        const uploadData = await uploadResponse.json();
+        console.log('Book uploaded:', uploadData);
+
+        // Step 2: Load the file in viewer
+        await handleFile(file);
+
+        // Step 3: Refresh books list
+        await loadBooksList();
+
+        // Step 4: Hide welcome message
         elements.welcomeMessage.style.display = 'none';
+
+        // Step 5: Show success message
+        showSuccessMessage(`📚 ${file.name} uploaded successfully!`);
+
     } catch (error) {
-        console.error('Error loading file:', error);
-        alert('Error loading file: ' + error.message);
+        console.error('Error uploading file:', error);
+        alert('Error uploading file: ' + error.message);
     } finally {
         showLoading(false);
+        // Reset file input
+        event.target.value = '';
     }
+}
+
+async function handleFile(file) {
+    const fileName = file.name.toLowerCase();
+
+    if (fileName.endsWith('.pdf')) {
+        await loadPDF(file);
+    } else if (fileName.endsWith('.epub')) {
+        await loadEPUB(file);
+    }
+}
+
+function showSuccessMessage(message) {
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        position: fixed;
+        top: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--system-green);
+        color: white;
+        padding: 16px 24px;
+        border-radius: 12px;
+        font-size: 17px;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 10000;
+        animation: slideDown 0.3s ease;
+    `;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(-50%) translateY(-20px)';
+        toast.style.transition = 'all 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }
 
 // ================================
