@@ -558,8 +558,9 @@ app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
     console.log(`📚 PDF/EPUB Reader with Translator`);
 
-    // Auto-import books on startup
-    setTimeout(() => {
-        autoImportBooks();
-    }, 1000);
+    // Auto-import disabled - using scanBooksCollection() instead
+    // Books are served directly from Books_Collection via /books/ static route
+    // setTimeout(() => {
+    //     autoImportBooks();
+    // }, 1000);
 });
