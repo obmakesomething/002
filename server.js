@@ -249,6 +249,16 @@ function scanBooksCollection() {
         return books;
     }
 
+    // Parse category from folder structure
+    function parseCategory(relativePath) {
+        const parts = relativePath.split('/').filter(p => p);
+        if (parts.length >= 2) {
+            const category = parts[1]; // e.g., "Business", "Design_UX"
+            return category.replace(/_/g, ' & '); // "Design_UX" → "Design & UX"
+        }
+        return 'Uncategorized';
+    }
+
     // Recursively find all PDF and EPUB files
     function scanDirectory(dir, relativePath = '') {
         const items = fs.readdirSync(dir);
@@ -263,6 +273,7 @@ function scanBooksCollection() {
             } else if (item.endsWith('.pdf') || item.endsWith('.epub')) {
                 const ext = path.extname(item);
                 const title = path.basename(item, ext);
+                const category = parseCategory(relPath);
 
                 books.push({
                     id: `collection-${books.length}`,
@@ -271,7 +282,8 @@ function scanBooksCollection() {
                     file_path: relPath.replace(/\\/g, '/'), // Normalize path separators
                     file_type: ext === '.pdf' ? 'application/pdf' : 'application/epub+zip',
                     file_size: stats.size,
-                    uploaded_at: stats.mtime.toISOString()
+                    uploaded_at: stats.mtime.toISOString(),
+                    category: category
                 });
             }
         });

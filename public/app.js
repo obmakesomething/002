@@ -1163,6 +1163,9 @@ function closeMobileMenu() {
 // Books List Functions
 // ================================
 
+let allBooks = []; // Store all books for filtering
+let selectedCategory = 'all';
+
 async function loadBooksList() {
     try {
         const response = await fetch('/api/books', {
@@ -1172,17 +1175,58 @@ async function loadBooksList() {
             throw new Error('Failed to load books');
         }
 
-        const books = await response.json();
-        displayBooksList(books);
+        allBooks = await response.json();
+
+        // Populate category filter
+        populateCategoryFilter();
+
+        // Display books
+        displayBooksList(allBooks);
+
+        // Setup filter event listener
+        const categoryFilter = document.getElementById('categoryFilter');
+        if (categoryFilter) {
+            categoryFilter.addEventListener('change', (e) => {
+                selectedCategory = e.target.value;
+                filterAndDisplayBooks();
+            });
+        }
     } catch (error) {
         console.error('Load books error:', error);
         elements.booksList.innerHTML = '<p style="color: #999; text-align: center; margin-top: 2rem; font-size: 11px;">Failed to load books</p>';
     }
 }
 
+function populateCategoryFilter() {
+    const categoryFilter = document.getElementById('categoryFilter');
+    if (!categoryFilter) return;
+
+    // Extract unique categories
+    const categories = [...new Set(allBooks.map(book => book.category).filter(Boolean))].sort();
+
+    // Build options HTML
+    let optionsHTML = '<option value="all">All Categories</option>';
+    categories.forEach(category => {
+        optionsHTML += `<option value="${category}">${category}</option>`;
+    });
+
+    categoryFilter.innerHTML = optionsHTML;
+}
+
+function filterAndDisplayBooks() {
+    let filteredBooks = allBooks;
+
+    // Filter by category
+    if (selectedCategory !== 'all') {
+        filteredBooks = filteredBooks.filter(book => book.category === selectedCategory);
+    }
+
+    displayBooksList(filteredBooks);
+}
+
 function displayBooksList(books) {
     if (!books || books.length === 0) {
-        elements.booksList.innerHTML = '<p style="color: #999; text-align: center; margin-top: 2rem; font-size: 11px;">No books yet. Upload one to get started!</p>';
+        elements.booksList.innerHTML = '<p style="color: #999; text-align: center; margin-top: 2rem; font-size: 11px;">No books found</p>';
         return;
     }
 
@@ -1192,16 +1236,17 @@ function displayBooksList(books) {
         const uploadDate = new Date(book.uploaded_at).toLocaleDateString('ko-KR');
         const source = book.source || 'uploaded';
         const sourceIcon = source === 'collection' ? '📚' : '📁';
+        const category = book.category ? `<span style="font-size: 9px; color: var(--system-gray);">· ${book.category}</span>` : '';
 
         return `
-            <div class="book-item" data-book-id="${book.id}" data-file-path="${book.file_path}" data-source="${source}">
+            <div class="book-item" data-book-id="${book.id}" data-file-path="${book.file_path}" data-source="${source}" data-category="${book.category || ''}">
                 <div class="book-title">${sourceIcon} ${book.title}</div>
                 <div class="book-meta">
                     <span class="book-type">${fileType}</span>
                     <span>${fileSize} MB</span>
                 </div>
                 <div class="book-meta" style="margin-top: 4px;">
-                    <span style="font-size: 8px; color: var(--gray-500);">${uploadDate}</span>
+                    <span style="font-size: 8px; color: var(--gray-500);">${uploadDate} ${category}</span>
                 </div>
             </div>
         `;
