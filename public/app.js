@@ -17,8 +17,16 @@ const state = {
     // EPUB specific
     epubBook: null,
     epubRendition: null,
-    epubFontSize: 19,
+    epubFontSize: 14,
     epubKeyboardHandler: null,
+    epubSettings: {
+        fontSize: 14,
+        letterSpacing: 0,
+        lineHeight: 1.7,
+        paragraphSpacing: 0.5,
+        fontFamily: '-apple-system, system-ui',
+        darkMode: false
+    },
 
     // Translation & Grammar
     selectedText: '',
@@ -492,8 +500,12 @@ async function loadEPUB(file) {
 
         await state.epubRendition.display();
 
-        // Setup EPUB font size (default 19px)
-        state.epubRendition.themes.fontSize('19px');
+        // Register and apply EPUB themes
+        registerEPUBThemes();
+        applyEPUBSettings();
+
+        // Setup EPUB settings event listeners
+        setupEPUBSettingsListeners();
 
         // Hide loading once content is visible
         showLoading(false);
@@ -599,6 +611,183 @@ function setupEPUBKeyboardNav() {
     };
 
     document.addEventListener('keydown', state.epubKeyboardHandler);
+}
+
+// ================================
+// EPUB Typography Settings
+// ================================
+
+function registerEPUBThemes() {
+    if (!state.epubRendition) return;
+
+    // Light theme
+    state.epubRendition.themes.register('light', {
+        body: {
+            'background-color': '#FFFFFF !important',
+            'color': '#000000 !important'
+        }
+    });
+
+    // Dark theme
+    state.epubRendition.themes.register('dark', {
+        body: {
+            'background-color': '#1C1C1E !important',
+            'color': '#E5E5EA !important'
+        },
+        'p, div, span': {
+            'color': '#E5E5EA !important'
+        },
+        'a': {
+            'color': '#007AFF !important'
+        }
+    });
+}
+
+function applyEPUBSettings() {
+    if (!state.epubRendition) return;
+
+    const s = state.epubSettings;
+
+    // Font size
+    state.epubRendition.themes.fontSize(`${s.fontSize}pt`);
+
+    // Font family
+    state.epubRendition.themes.font(s.fontFamily);
+
+    // Theme (dark/light)
+    state.epubRendition.themes.select(s.darkMode ? 'dark' : 'light');
+
+    // Letter spacing, line height, paragraph spacing
+    const customCSS = `
+        body {
+            letter-spacing: ${s.letterSpacing}em !important;
+            line-height: ${s.lineHeight} !important;
+        }
+        p {
+            margin-bottom: ${s.paragraphSpacing * s.lineHeight}em !important;
+        }
+    `;
+
+    state.epubRendition.themes.override('custom', customCSS);
+}
+
+function setupEPUBSettingsListeners() {
+    // Dark mode toggle
+    const darkModeToggle = document.getElementById('epubDarkMode');
+    if (darkModeToggle) {
+        darkModeToggle.checked = state.epubSettings.darkMode;
+        darkModeToggle.addEventListener('change', (e) => {
+            state.epubSettings.darkMode = e.target.checked;
+            applyEPUBSettings();
+        });
+    }
+
+    // Font size slider and input
+    const fontSizeSlider = document.getElementById('epubFontSizeSlider');
+    const fontSizeInput = document.getElementById('epubFontSizeInput');
+
+    if (fontSizeSlider && fontSizeInput) {
+        fontSizeSlider.value = state.epubSettings.fontSize;
+        fontSizeInput.value = state.epubSettings.fontSize;
+
+        const updateFontSize = (value) => {
+            state.epubSettings.fontSize = parseInt(value);
+            fontSizeSlider.value = value;
+            fontSizeInput.value = value;
+            applyEPUBSettings();
+        };
+
+        fontSizeSlider.addEventListener('input', (e) => updateFontSize(e.target.value));
+        fontSizeInput.addEventListener('change', (e) => updateFontSize(e.target.value));
+    }
+
+    // Letter spacing
+    const letterSpacingSlider = document.getElementById('epubLetterSpacingSlider');
+    const letterSpacingValue = document.getElementById('epubLetterSpacingValue');
+
+    if (letterSpacingSlider && letterSpacingValue) {
+        letterSpacingSlider.value = state.epubSettings.letterSpacing * 100;
+        letterSpacingValue.textContent = state.epubSettings.letterSpacing.toFixed(2) + 'em';
+
+        letterSpacingSlider.addEventListener('input', (e) => {
+            const value = parseInt(e.target.value) / 100;
+            state.epubSettings.letterSpacing = value;
+            letterSpacingValue.textContent = value.toFixed(2) + 'em';
+            applyEPUBSettings();
+        });
+    }
+
+    // Line height
+    const lineHeightSlider = document.getElementById('epubLineHeightSlider');
+    const lineHeightValue = document.getElementById('epubLineHeightValue');
+
+    if (lineHeightSlider && lineHeightValue) {
+        lineHeightSlider.value = state.epubSettings.lineHeight * 10;
+        lineHeightValue.textContent = state.epubSettings.lineHeight.toFixed(1);
+
+        lineHeightSlider.addEventListener('input', (e) => {
+            const value = parseInt(e.target.value) / 10;
+            state.epubSettings.lineHeight = value;
+            lineHeightValue.textContent = value.toFixed(1);
+            applyEPUBSettings();
+        });
+    }
+
+    // Paragraph spacing
+    const paragraphSpacingSlider = document.getElementById('epubParagraphSpacingSlider');
+    const paragraphSpacingValue = document.getElementById('epubParagraphSpacingValue');
+
+    if (paragraphSpacingSlider && paragraphSpacingValue) {
+        paragraphSpacingSlider.value = state.epubSettings.paragraphSpacing * 10;
+        paragraphSpacingValue.textContent = state.epubSettings.paragraphSpacing.toFixed(1) + 'x';
+
+        paragraphSpacingSlider.addEventListener('input', (e) => {
+            const value = parseInt(e.target.value) / 10;
+            state.epubSettings.paragraphSpacing = value;
+            paragraphSpacingValue.textContent = value.toFixed(1) + 'x';
+            applyEPUBSettings();
+        });
+    }
+
+    // Font family
+    const fontFamilySelect = document.getElementById('epubFontFamily');
+    if (fontFamilySelect) {
+        fontFamilySelect.value = state.epubSettings.fontFamily;
+        fontFamilySelect.addEventListener('change', (e) => {
+            state.epubSettings.fontFamily = e.target.value;
+            applyEPUBSettings();
+        });
+    }
+
+    // Reset button
+    const resetButton = document.getElementById('resetEpubSettings');
+    if (resetButton) {
+        resetButton.addEventListener('click', () => {
+            // Reset to defaults
+            state.epubSettings = {
+                fontSize: 14,
+                letterSpacing: 0,
+                lineHeight: 1.7,
+                paragraphSpacing: 0.5,
+                fontFamily: '-apple-system, system-ui',
+                darkMode: false
+            };
+
+            // Update UI
+            if (darkModeToggle) darkModeToggle.checked = false;
+            if (fontSizeSlider) fontSizeSlider.value = 14;
+            if (fontSizeInput) fontSizeInput.value = 14;
+            if (letterSpacingSlider) letterSpacingSlider.value = 0;
+            if (letterSpacingValue) letterSpacingValue.textContent = '0.00em';
+            if (lineHeightSlider) lineHeightSlider.value = 17;
+            if (lineHeightValue) lineHeightValue.textContent = '1.7';
+            if (paragraphSpacingSlider) paragraphSpacingSlider.value = 5;
+            if (paragraphSpacingValue) paragraphSpacingValue.textContent = '0.5x';
+            if (fontFamilySelect) fontFamilySelect.value = '-apple-system, system-ui';
+
+            applyEPUBSettings();
+        });
+    }
 }
 
 // ================================

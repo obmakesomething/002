@@ -33,7 +33,7 @@
                 <div class="sidebar-tabs">
                     <button class="sidebar-tab active" data-tab="books">📚 Books</button>
                     <button class="sidebar-tab" data-tab="toc">📑 TOC</button>
-                    <button class="sidebar-tab" data-tab="bionic">⚙️</button>
+                    <button class="sidebar-tab" data-tab="epub">📖 Reader</button>
                 </div>
 
                 <div class="sidebar-content active" id="booksContent">
@@ -58,49 +58,59 @@
                     </ul>
                 </div>
 
-                <div class="sidebar-content" id="bionicContent">
-                    <h3>Bionic Reading Settings</h3>
+                <div class="sidebar-content" id="epubContent">
+                    <h3>Reader Settings</h3>
 
                     <div class="setting-group">
-                        <label>Enable Bionic Reading</label>
-                        <input type="checkbox" id="bionicEnabled" />
+                        <label>Dark Mode</label>
+                        <input type="checkbox" id="epubDarkMode" />
                     </div>
 
                     <div class="setting-group">
-                        <label>Fixation (강조 글자 수)</label>
-                        <input type="range" id="fixationLevel" min="1" max="5" value="2" />
-                        <span id="fixationValue">2</span>
+                        <label>Font Size (pt)</label>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="range" id="epubFontSizeSlider" min="8" max="36" value="14" style="flex: 1;" />
+                            <input type="number" id="epubFontSizeInput" min="8" max="36" value="14" style="width: 50px;" />
+                            <span style="font-size: 11px;">pt</span>
+                        </div>
                     </div>
 
                     <div class="setting-group">
-                        <label>Saccade (단어 간격)</label>
-                        <input type="range" id="saccadeLevel" min="1" max="5" value="1" />
-                        <span id="saccadeValue">1</span>
+                        <label>자간 (Letter Spacing)</label>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="range" id="epubLetterSpacingSlider" min="-5" max="20" value="0" step="1" style="flex: 1;" />
+                            <span id="epubLetterSpacingValue" style="font-size: 11px; min-width: 45px;">0.00em</span>
+                        </div>
                     </div>
 
                     <div class="setting-group">
-                        <label>Opacity (강조 강도)</label>
-                        <input type="range" id="opacityLevel" min="1" max="100" value="70" />
-                        <span id="opacityValue">70%</span>
+                        <label>행간 (Line Height)</label>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="range" id="epubLineHeightSlider" min="10" max="25" value="17" step="1" style="flex: 1;" />
+                            <span id="epubLineHeightValue" style="font-size: 11px; min-width: 35px;">1.7</span>
+                        </div>
                     </div>
 
                     <div class="setting-group">
-                        <label>Mode</label>
-                        <select id="bionicMode">
-                            <option value="letters">Letters (글자)</option>
-                            <option value="syllables">Syllables (음절)</option>
+                        <label>단락 간격</label>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="range" id="epubParagraphSpacingSlider" min="0" max="20" value="5" step="1" style="flex: 1;" />
+                            <span id="epubParagraphSpacingValue" style="font-size: 11px; min-width: 45px;">0.5x</span>
+                        </div>
+                    </div>
+
+                    <div class="setting-group">
+                        <label>Font Family</label>
+                        <select id="epubFontFamily" style="width: 100%;">
+                            <option value="-apple-system, system-ui">System (SF Pro)</option>
+                            <option value="Georgia, serif">Georgia</option>
+                            <option value="'Times New Roman', serif">Times New Roman</option>
+                            <option value="'Palatino', serif">Palatino</option>
+                            <option value="'Courier New', monospace">Courier New</option>
                         </select>
                     </div>
 
-                    <div class="setting-group">
-                        <label>Apply To</label>
-                        <select id="bionicApply">
-                            <option value="all">Entire Document</option>
-                            <option value="selection">Selection Only</option>
-                        </select>
-                    </div>
-
-                    <button id="applyBionic" class="btn btn-secondary" style="width: 100%; margin-top: 1rem;">Apply Settings</button>
+                    <button id="resetEpubSettings" class="btn btn-secondary" style="width: 100%; margin-top: 1rem;">Reset to Default</button>
                 </div>
             </aside>
 
