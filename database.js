@@ -86,19 +86,36 @@ function initializeDatabase() {
         )
     `);
 
-    // Create default user for single-user system
-    const userCount = db.prepare('SELECT COUNT(*) as count FROM users').get();
-    if (userCount.count === 0) {
-        db.prepare('INSERT INTO users (id, username, password, email) VALUES (?, ?, ?, ?)')
-            .run(1, 'default_user', 'no_password_needed', null);
-        console.log('👤 Created default user (id=1)');
-    }
-
     console.log('✅ Database initialized successfully');
+}
+
+// Ensure default user exists (for single-user system)
+function ensureDefaultUser() {
+    try {
+        // Use INSERT OR IGNORE to avoid errors if user already exists
+        const result = db.prepare(`
+            INSERT OR IGNORE INTO users (id, username, password, email)
+            VALUES (?, ?, ?, ?)
+        `).run(1, 'default_user', 'no_password_needed', null);
+
+        if (result.changes > 0) {
+            console.log('👤 Created default user (id=1)');
+        } else {
+            console.log('👤 Default user (id=1) already exists');
+        }
+    } catch (error) {
+        console.error('Error ensuring default user:', error);
+        // Try to check if user exists
+        const user = db.prepare('SELECT id FROM users WHERE id = 1').get();
+        if (!user) {
+            console.error('⚠️  WARNING: Default user does not exist! Upload will fail!');
+        }
+    }
 }
 
 // Initialize database on startup
 initializeDatabase();
+ensureDefaultUser();
 
 // ================================
 // User Operations
