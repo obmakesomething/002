@@ -174,7 +174,7 @@ async function handleFileSelect(event) {
         return;
     }
 
-    showLoading(true);
+    showLoading(true, 'Uploading to server...');
 
     try {
         // Step 1: Upload to server
@@ -209,6 +209,7 @@ async function handleFileSelect(event) {
         console.log('Book uploaded:', uploadData);
 
         // Step 2: Load the file in viewer
+        // handleFile will show its own loading messages
         await handleFile(file);
 
         // Step 3: Refresh books list
@@ -223,8 +224,8 @@ async function handleFileSelect(event) {
     } catch (error) {
         console.error('Error uploading file:', error);
         alert('Error uploading file: ' + error.message);
-    } finally {
         showLoading(false);
+    } finally {
         // Reset file input
         event.target.value = '';
     }
@@ -273,28 +274,43 @@ function showSuccessMessage(message) {
 // ================================
 
 async function loadPDF(file) {
-    state.documentType = 'pdf';
+    try {
+        state.documentType = 'pdf';
 
-    const arrayBuffer = await file.arrayBuffer();
-    const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
-    state.pdfDoc = await loadingTask.promise;
-    state.pageCount = state.pdfDoc.numPages;
-    state.currentPage = 1;
+        showLoading(true, 'Loading PDF document...');
+        const arrayBuffer = await file.arrayBuffer();
 
-    // Show PDF container
-    elements.pdfContainer.style.display = 'flex';
-    elements.epubContainer.style.display = 'none';
+        showLoading(true, 'Parsing PDF structure...');
+        const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+        state.pdfDoc = await loadingTask.promise;
+        state.pageCount = state.pdfDoc.numPages;
+        state.currentPage = 1;
 
-    // Update UI
-    elements.pageCount.textContent = state.pageCount;
-    elements.prevPageBtn.disabled = false;
-    elements.nextPageBtn.disabled = false;
+        // Show PDF container
+        elements.pdfContainer.style.display = 'flex';
+        elements.epubContainer.style.display = 'none';
 
-    // Load first page
-    await renderPage(state.currentPage);
+        // Update UI
+        elements.pageCount.textContent = state.pageCount;
+        elements.prevPageBtn.disabled = false;
+        elements.nextPageBtn.disabled = false;
 
-    // Load table of contents
-    await loadPDFTableOfContents();
+        // Load first page
+        showLoading(true, 'Rendering page 1...');
+        await renderPage(state.currentPage);
+
+        showLoading(false);
+
+        // Load table of contents in background
+        loadPDFTableOfContents().catch(err => {
+            console.error('Failed to load PDF TOC:', err);
+        });
+
+    } catch (error) {
+        showLoading(false);
+        console.error('PDF loading error:', error);
+        alert('Failed to load PDF: ' + error.message);
+    }
 }
 
 async function renderPage(pageNum) {
@@ -392,38 +408,55 @@ function changeZoom(delta) {
 // ================================
 
 async function loadEPUB(file) {
-    state.documentType = 'epub';
+    try {
+        state.documentType = 'epub';
 
-    const arrayBuffer = await file.arrayBuffer();
+        // Step 1: Read file
+        showLoading(true, 'Reading EPUB file...');
+        const arrayBuffer = await file.arrayBuffer();
 
-    // Create EPUB book
-    state.epubBook = ePub();
-    await state.epubBook.open(arrayBuffer);
+        // Step 2: Parse EPUB structure
+        showLoading(true, 'Parsing EPUB structure...');
+        state.epubBook = ePub();
+        await state.epubBook.open(arrayBuffer);
 
-    // Show EPUB container
-    elements.pdfContainer.style.display = 'none';
-    elements.epubContainer.style.display = 'block';
+        // Show EPUB container
+        elements.pdfContainer.style.display = 'none';
+        elements.epubContainer.style.display = 'block';
 
-    // Disable PDF controls
-    elements.prevPageBtn.disabled = true;
-    elements.nextPageBtn.disabled = true;
-    elements.pageNum.textContent = '-';
-    elements.pageCount.textContent = '-';
+        // Disable PDF controls
+        elements.prevPageBtn.disabled = true;
+        elements.nextPageBtn.disabled = true;
+        elements.pageNum.textContent = '-';
+        elements.pageCount.textContent = '-';
 
-    // Render EPUB
-    state.epubRendition = state.epubBook.renderTo(elements.epubContainer, {
-        width: '100%',
-        height: '100%',
-        spread: 'none'
-    });
+        // Step 3: Render first page
+        showLoading(true, 'Rendering content...');
+        state.epubRendition = state.epubBook.renderTo(elements.epubContainer, {
+            width: '100%',
+            height: '100%',
+            spread: 'none',
+            flow: 'paginated'
+        });
 
-    await state.epubRendition.display();
+        await state.epubRendition.display();
 
-    // Load table of contents
-    await loadEPUBTableOfContents();
+        // Hide loading once content is visible
+        showLoading(false);
 
-    // Enable text selection
-    setupEPUBTextSelection();
+        // Load table of contents in background (don't block)
+        loadEPUBTableOfContents().catch(err => {
+            console.error('Failed to load TOC:', err);
+        });
+
+        // Enable text selection
+        setupEPUBTextSelection();
+
+    } catch (error) {
+        showLoading(false);
+        console.error('EPUB loading error:', error);
+        alert('Failed to load EPUB: ' + error.message);
+    }
 }
 
 async function loadEPUBTableOfContents() {
@@ -762,9 +795,13 @@ function clearVocabulary() {
 // Utility Functions
 // ================================
 
-function showLoading(show) {
+function showLoading(show, message = 'Loading...') {
     if (show) {
         elements.loadingOverlay.classList.remove('hidden');
+        const messageElement = elements.loadingOverlay.querySelector('p');
+        if (messageElement) {
+            messageElement.textContent = message;
+        }
     } else {
         elements.loadingOverlay.classList.add('hidden');
     }
@@ -1162,7 +1199,7 @@ function displayBooksList(books) {
 
 async function loadBookFromServer(bookId, filePath) {
     try {
-        showLoading(true);
+        showLoading(true, 'Loading book from server...');
 
         // Fetch the book file
         const response = await fetch(`/uploads/${filePath}`, {
@@ -1175,7 +1212,7 @@ async function loadBookFromServer(bookId, filePath) {
         const blob = await response.blob();
         const file = new File([blob], filePath, { type: blob.type });
 
-        // Load the book
+        // Load the book (handleFile will show its own loading messages)
         await handleFile(file);
 
         // Mark as active
@@ -1189,7 +1226,7 @@ async function loadBookFromServer(bookId, filePath) {
         // Switch to TOC tab
         switchSidebarTab('toc');
 
-        showLoading(false);
+        // Loading will be hidden by handleFile
     } catch (error) {
         console.error('Load book from server error:', error);
         alert('Failed to load book: ' + error.message);
