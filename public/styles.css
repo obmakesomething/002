@@ -851,6 +851,172 @@ body {
    RESPONSIVE BREAKPOINTS
    ======================================== */
 
+/* Large Desktop (MacBook Pro 15", iMac, etc.) */
+@media (min-width: 1440px) {
+    .main-content {
+        grid-template-columns: 320px 1fr 280px;
+    }
+
+    .sidebar {
+        padding: var(--space-4);
+    }
+
+    /* Grid layout for books on larger screens */
+    .books-list {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: var(--space-2);
+    }
+
+    .book-item {
+        padding: var(--space-3);
+    }
+
+    .book-title {
+        font-size: var(--scale-base);
+    }
+
+    /* Enhanced hover effects for mouse users */
+    .book-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+    }
+
+    /* Wider PDF controls */
+    .pdf-controls {
+        padding: var(--space-3) var(--space-4);
+        gap: var(--space-4);
+    }
+
+    .btn-nav {
+        min-width: 120px;
+        padding: 12px 24px;
+    }
+
+    /* Better PDF viewing experience on desktop */
+    .pdf-container {
+        padding: var(--space-8);
+    }
+
+    #pdfCanvas {
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12),
+                    0 0 0 1px var(--system-gray-4);
+        border-radius: var(--radius-lg);
+    }
+
+    /* Larger EPUB reading area */
+    #epubContainer {
+        max-width: 880px;
+        padding: var(--space-8);
+        font-size: 19px;
+        line-height: 1.8;
+    }
+
+    /* Larger vocabulary panel */
+    .vocab-panel {
+        padding: var(--space-4);
+    }
+
+    .vocab-panel h2 {
+        font-size: var(--scale-2);
+        margin-bottom: var(--space-3);
+    }
+
+    /* Better scrollbar for desktop */
+    .pdf-container::-webkit-scrollbar,
+    .sidebar::-webkit-scrollbar,
+    .vocab-list::-webkit-scrollbar {
+        width: 12px;
+        height: 12px;
+    }
+
+    .pdf-container::-webkit-scrollbar-track,
+    .sidebar::-webkit-scrollbar-track,
+    .vocab-list::-webkit-scrollbar-track {
+        background: var(--system-gray-6);
+        border-radius: 6px;
+    }
+
+    .pdf-container::-webkit-scrollbar-thumb,
+    .sidebar::-webkit-scrollbar-thumb,
+    .vocab-list::-webkit-scrollbar-thumb {
+        background: var(--system-gray-3);
+        border-radius: 6px;
+        border: 2px solid var(--system-gray-6);
+    }
+
+    .pdf-container::-webkit-scrollbar-thumb:hover,
+    .sidebar::-webkit-scrollbar-thumb:hover,
+    .vocab-list::-webkit-scrollbar-thumb:hover {
+        background: var(--system-gray-2);
+    }
+
+    /* Larger context menu for easier clicking */
+    .context-menu {
+        min-width: 240px;
+    }
+
+    .context-menu-item {
+        padding: var(--space-3) var(--space-4);
+        font-size: var(--scale-base);
+    }
+
+    /* Translation popup optimized for desktop */
+    .popup {
+        max-width: 720px;
+        max-height: 85vh;
+    }
+
+    .popup-content {
+        padding: var(--space-5);
+    }
+
+    .selected-text,
+    .translation-text,
+    .grammar-text {
+        font-size: var(--scale-1);
+        padding: var(--space-4);
+        line-height: 1.8;
+    }
+}
+
+/* Extra Large Desktop (27" iMac, External Displays) */
+@media (min-width: 1920px) {
+    .main-content {
+        grid-template-columns: 380px 1fr 320px;
+    }
+
+    /* 2-column grid for books */
+    .books-list {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-3);
+    }
+
+    .book-item {
+        padding: var(--space-3);
+    }
+
+    /* Larger text for comfort at distance */
+    body {
+        font-size: 18px;
+    }
+
+    .header h1 {
+        font-size: 26px;
+    }
+
+    .btn {
+        font-size: 18px;
+        padding: 12px 24px;
+    }
+}
+
+/* Tablet / Small Laptop */
 @media (max-width: 1200px) {
     .main-content {
         grid-template-columns: 180px 1fr;
