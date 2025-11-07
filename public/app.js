@@ -434,9 +434,10 @@ async function loadEPUB(file) {
             throw new Error('EPUB.js library not loaded. Please refresh the page.');
         }
 
+        // Create book instance and open the arrayBuffer
         const epubConstructor = typeof ePub !== 'undefined' ? ePub : window.ePub;
-        state.epubBook = epubConstructor(arrayBuffer);
-        await state.epubBook.opened;
+        state.epubBook = epubConstructor();
+        await state.epubBook.open(arrayBuffer);
 
         // Show EPUB container
         elements.pdfContainer.style.display = 'none';
@@ -1189,10 +1190,12 @@ function displayBooksList(books) {
         const fileType = book.file_type === 'application/pdf' ? 'PDF' : 'EPUB';
         const fileSize = (book.file_size / 1024 / 1024).toFixed(2);
         const uploadDate = new Date(book.uploaded_at).toLocaleDateString('ko-KR');
+        const source = book.source || 'uploaded';
+        const sourceIcon = source === 'collection' ? '📚' : '📁';
 
         return `
-            <div class="book-item" data-book-id="${book.id}" data-file-path="${book.file_path}">
-                <div class="book-title">${book.title}</div>
+            <div class="book-item" data-book-id="${book.id}" data-file-path="${book.file_path}" data-source="${source}">
+                <div class="book-title">${sourceIcon} ${book.title}</div>
                 <div class="book-meta">
                     <span class="book-type">${fileType}</span>
                     <span>${fileSize} MB</span>
@@ -1209,26 +1212,36 @@ function displayBooksList(books) {
         item.addEventListener('click', async () => {
             const bookId = item.dataset.bookId;
             const filePath = item.dataset.filePath;
-            await loadBookFromServer(bookId, filePath);
+            const source = item.dataset.source;
+            await loadBookFromServer(bookId, filePath, source);
             closeMobileMenu();
         });
     });
 }
 
-async function loadBookFromServer(bookId, filePath) {
+async function loadBookFromServer(bookId, filePath, source = 'uploaded') {
     try {
         showLoading(true, 'Loading book from server...');
 
+        // Determine the correct path based on source
+        const basePath = source === 'collection' ? '/books' : '/uploads';
+        const fetchUrl = `${basePath}/${filePath}`;
+
+        console.log(`Loading book from: ${fetchUrl} (source: ${source})`);
+
         // Fetch the book file
-        const response = await fetch(`/uploads/${filePath}`, {
+        const response = await fetch(fetchUrl, {
             credentials: 'include'
         });
+
         if (!response.ok) {
-            throw new Error('Failed to load book file');
+            console.error(`Failed to load book: ${response.status} ${response.statusText}`);
+            throw new Error(`Failed to load book file (${response.status})`);
         }
 
         const blob = await response.blob();
-        const file = new File([blob], filePath, { type: blob.type });
+        const fileName = filePath.split('/').pop() || filePath;
+        const file = new File([blob], fileName, { type: blob.type });
 
         // Load the book (handleFile will show its own loading messages)
         await handleFile(file);

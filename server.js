@@ -28,6 +28,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.use('/uploads', express.static('uploads'));
+app.use('/books', express.static('Books_Collection'));
 
 // Session configuration
 app.use(session({
@@ -217,13 +218,68 @@ app.post('/api/books/upload', isAuthenticated, upload.single('book'), (req, res)
 
 app.get('/api/books', isAuthenticated, (req, res) => {
     try {
-        const books = db.getBooksByUserId(req.session.userId);
-        res.json(books);
+        const uploadedBooks = db.getBooksByUserId(req.session.userId);
+        const collectionBooks = scanBooksCollection();
+
+        // Combine both sources
+        const allBooks = [
+            ...uploadedBooks.map(book => ({
+                ...book,
+                source: 'uploaded'
+            })),
+            ...collectionBooks.map(book => ({
+                ...book,
+                source: 'collection'
+            }))
+        ];
+
+        res.json(allBooks);
     } catch (error) {
         console.error('Get books error:', error);
         res.status(500).json({ error: 'Failed to retrieve books' });
     }
 });
+
+// Scan Books_Collection folder for PDF and EPUB files
+function scanBooksCollection() {
+    const books = [];
+    const booksDir = path.join(__dirname, 'Books_Collection');
+
+    if (!fs.existsSync(booksDir)) {
+        return books;
+    }
+
+    // Recursively find all PDF and EPUB files
+    function scanDirectory(dir, relativePath = '') {
+        const items = fs.readdirSync(dir);
+
+        items.forEach(item => {
+            const fullPath = path.join(dir, item);
+            const stats = fs.statSync(fullPath);
+            const relPath = path.join(relativePath, item);
+
+            if (stats.isDirectory()) {
+                scanDirectory(fullPath, relPath);
+            } else if (item.endsWith('.pdf') || item.endsWith('.epub')) {
+                const ext = path.extname(item);
+                const title = path.basename(item, ext);
+
+                books.push({
+                    id: `collection-${books.length}`,
+                    user_id: 1,
+                    title: title,
+                    file_path: relPath.replace(/\\/g, '/'), // Normalize path separators
+                    file_type: ext === '.pdf' ? 'application/pdf' : 'application/epub+zip',
+                    file_size: stats.size,
+                    uploaded_at: stats.mtime.toISOString()
+                });
+            }
+        });
+    }
+
+    scanDirectory(booksDir);
+    return books;
+}
 
 app.get('/api/books/:id', isAuthenticated, (req, res) => {
     try {
