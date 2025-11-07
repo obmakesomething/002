@@ -17,6 +17,8 @@ const state = {
     // EPUB specific
     epubBook: null,
     epubRendition: null,
+    epubFontSize: 19,
+    epubKeyboardHandler: null,
 
     // Translation & Grammar
     selectedText: '',
@@ -306,6 +308,11 @@ async function loadPDF(file) {
         elements.prevPageBtn.disabled = false;
         elements.nextPageBtn.disabled = false;
 
+        // Enable zoom controls for PDF
+        elements.zoomIn.disabled = false;
+        elements.zoomOut.disabled = false;
+        elements.zoomLevel.textContent = Math.round(state.scale * 100) + '%';
+
         // Load first page
         showLoading(true, 'Rendering page 1...');
         await renderPage(state.currentPage);
@@ -402,16 +409,36 @@ async function loadPDFTableOfContents() {
 }
 
 function changePage(delta) {
-    const newPage = state.currentPage + delta;
-    if (newPage >= 1 && newPage <= state.pageCount) {
-        renderPage(newPage);
+    if (state.documentType === 'epub') {
+        // EPUB navigation
+        if (delta > 0) {
+            state.epubRendition.next();
+        } else {
+            state.epubRendition.prev();
+        }
+    } else {
+        // PDF navigation
+        const newPage = state.currentPage + delta;
+        if (newPage >= 1 && newPage <= state.pageCount) {
+            renderPage(newPage);
+        }
     }
 }
 
 function changeZoom(delta) {
-    state.scale = Math.max(0.5, Math.min(3, state.scale + delta));
-    elements.zoomLevel.textContent = Math.round(state.scale * 100) + '%';
-    renderPage(state.currentPage);
+    if (state.documentType === 'epub') {
+        // EPUB font size adjustment
+        const currentSize = parseInt(state.epubFontSize || 19);
+        const newSize = Math.max(14, Math.min(32, currentSize + delta * 2));
+        state.epubFontSize = newSize;
+        state.epubRendition.themes.fontSize(newSize + 'px');
+        elements.zoomLevel.textContent = newSize + 'px';
+    } else {
+        // PDF zoom
+        state.scale = Math.max(0.5, Math.min(3, state.scale + delta));
+        elements.zoomLevel.textContent = Math.round(state.scale * 100) + '%';
+        renderPage(state.currentPage);
+    }
 }
 
 // ================================
@@ -443,11 +470,16 @@ async function loadEPUB(file) {
         elements.pdfContainer.style.display = 'none';
         elements.epubContainer.style.display = 'block';
 
-        // Disable PDF controls
-        elements.prevPageBtn.disabled = true;
-        elements.nextPageBtn.disabled = true;
-        elements.pageNum.textContent = '-';
-        elements.pageCount.textContent = '-';
+        // Enable navigation buttons for EPUB
+        elements.prevPageBtn.disabled = false;
+        elements.nextPageBtn.disabled = false;
+        elements.pageNum.textContent = 'EPUB';
+        elements.pageCount.textContent = 'Reader';
+
+        // Disable zoom for EPUB (use font settings instead)
+        elements.zoomIn.disabled = true;
+        elements.zoomOut.disabled = true;
+        elements.zoomLevel.textContent = 'Font';
 
         // Step 3: Render first page
         showLoading(true, 'Rendering content...');
@@ -460,6 +492,9 @@ async function loadEPUB(file) {
 
         await state.epubRendition.display();
 
+        // Setup EPUB font size (default 19px)
+        state.epubRendition.themes.fontSize('19px');
+
         // Hide loading once content is visible
         showLoading(false);
 
@@ -470,6 +505,9 @@ async function loadEPUB(file) {
 
         // Enable text selection
         setupEPUBTextSelection();
+
+        // Setup keyboard navigation for EPUB
+        setupEPUBKeyboardNav();
 
     } catch (error) {
         showLoading(false);
@@ -525,6 +563,42 @@ function setupEPUBTextSelection() {
             showTranslationPopup(text);
         }
     });
+}
+
+function setupEPUBKeyboardNav() {
+    // Remove previous keyboard listener if exists
+    if (state.epubKeyboardHandler) {
+        document.removeEventListener('keydown', state.epubKeyboardHandler);
+    }
+
+    // Create new keyboard handler
+    state.epubKeyboardHandler = (e) => {
+        if (state.documentType !== 'epub') return;
+
+        // Only handle if not typing in input/textarea
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+        switch(e.key) {
+            case 'ArrowLeft':
+                e.preventDefault();
+                state.epubRendition.prev();
+                break;
+            case 'ArrowRight':
+                e.preventDefault();
+                state.epubRendition.next();
+                break;
+            case 'ArrowUp':
+                e.preventDefault();
+                state.epubRendition.prev();
+                break;
+            case 'ArrowDown':
+                e.preventDefault();
+                state.epubRendition.next();
+                break;
+        }
+    };
+
+    document.addEventListener('keydown', state.epubKeyboardHandler);
 }
 
 // ================================
