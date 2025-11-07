@@ -86,6 +86,14 @@ function initializeDatabase() {
         )
     `);
 
+    // Create default user for single-user system
+    const userCount = db.prepare('SELECT COUNT(*) as count FROM users').get();
+    if (userCount.count === 0) {
+        db.prepare('INSERT INTO users (id, username, password, email) VALUES (?, ?, ?, ?)')
+            .run(1, 'default_user', 'no_password_needed', null);
+        console.log('👤 Created default user (id=1)');
+    }
+
     console.log('✅ Database initialized successfully');
 }
 
