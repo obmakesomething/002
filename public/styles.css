@@ -199,10 +199,10 @@ body {
 
 .main-content {
     display: grid;
-    grid-template-columns: 200px 1fr 240px;
+    grid-template-columns: 240px 1fr 280px;
     height: 100%;
     overflow: hidden;
-    background: var(--white);
+    background: var(--background-primary);
 }
 
 /* ========================================
@@ -222,7 +222,7 @@ body {
     grid-template-columns: 1fr 1fr 1fr;
     gap: 0;
     margin-bottom: var(--space-3);
-    border-bottom: 1px solid var(--gray-800);
+    border-bottom: 1px solid var(--system-gray-5);
 }
 
 .sidebar-tab {
@@ -230,18 +230,16 @@ body {
     background: none;
     border: none;
     border-bottom: 2px solid transparent;
-    font-size: var(--scale--2);
+    font-size: 13px;
     font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
     cursor: pointer;
-    color: var(--gray-500);
-    transition: all 0.15s ease;
+    color: var(--system-gray);
+    transition: all 0.2s ease;
 }
 
 .sidebar-tab.active {
-    border-bottom-color: var(--black);
-    color: var(--black);
+    border-bottom-color: var(--system-blue);
+    color: var(--system-blue);
 }
 
 .sidebar-content {
@@ -253,13 +251,11 @@ body {
 }
 
 .sidebar-content h3 {
-    font-size: var(--scale--1);
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+    font-size: 13px;
+    font-weight: 600;
     margin-top: var(--space-2);
     margin-bottom: var(--space-3);
-    color: var(--gray-800);
+    color: var(--label-primary);
 }
 
 /* Books List */
@@ -421,10 +417,9 @@ body {
    ======================================== */
 
 .pdf-viewer-section {
-    background: var(--white);
+    background: var(--background-secondary);
     display: flex;
     flex-direction: column;
-    border-right: 1px solid var(--gray-200);
     position: relative;
     overflow: hidden;
 }
@@ -473,11 +468,11 @@ body {
 .pdf-container {
     flex: 1;
     overflow: auto;
-    padding: var(--space-6);
+    padding: var(--space-8);
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    background: var(--gray-100);
+    background: var(--background-primary);
     position: relative;
     scroll-behavior: smooth;
 }
@@ -521,11 +516,13 @@ body {
 
 #epubContainer {
     flex: 1;
-    background: var(--white);
-    max-width: 720px;
+    background: var(--background-secondary);
+    max-width: 860px;
     margin: 0 auto;
-    padding: var(--space-6);
+    padding: var(--space-8);
     overflow: auto;
+    font-size: 19px;
+    line-height: 1.7;
 }
 
 .welcome-message {
