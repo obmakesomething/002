@@ -234,6 +234,17 @@ async function handleFileSelect(event) {
 async function handleFile(file) {
     const fileName = file.name.toLowerCase();
 
+    // Hide welcome message
+    if (elements.welcomeMessage) {
+        elements.welcomeMessage.style.display = 'none';
+    }
+
+    // Reset scroll position
+    if (elements.pdfContainer) {
+        elements.pdfContainer.scrollTop = 0;
+        elements.pdfContainer.scrollLeft = 0;
+    }
+
     if (fileName.endsWith('.pdf')) {
         await loadPDF(file);
     } else if (fileName.endsWith('.epub')) {
@@ -417,8 +428,15 @@ async function loadEPUB(file) {
 
         // Step 2: Parse EPUB structure
         showLoading(true, 'Parsing EPUB structure...');
-        state.epubBook = ePub();
-        await state.epubBook.open(arrayBuffer);
+
+        // Check if ePub is available
+        if (typeof ePub === 'undefined' && typeof window.ePub === 'undefined') {
+            throw new Error('EPUB.js library not loaded. Please refresh the page.');
+        }
+
+        const epubConstructor = typeof ePub !== 'undefined' ? ePub : window.ePub;
+        state.epubBook = epubConstructor(arrayBuffer);
+        await state.epubBook.opened;
 
         // Show EPUB container
         elements.pdfContainer.style.display = 'none';
