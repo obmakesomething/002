@@ -12,6 +12,16 @@ const db = require('./database');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Ensure required directories exist
+const requiredDirs = ['uploads', 'Books_Collection'];
+requiredDirs.forEach(dir => {
+    const dirPath = path.join(__dirname, dir);
+    if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath, { recursive: true });
+        console.log(`📁 Created ${dir} directory`);
+    }
+});
+
 // Middleware
 app.use(cors());
 app.use(express.json());
