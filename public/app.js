@@ -102,8 +102,22 @@ function init() {
 
 function setupEventListeners() {
     // File upload
-    elements.uploadBtn.addEventListener('click', () => elements.fileInput.click());
-    elements.fileInput.addEventListener('change', handleFileSelect);
+    if (elements.uploadBtn) {
+        elements.uploadBtn.addEventListener('click', () => {
+            console.log('Upload button clicked');
+            elements.fileInput.click();
+        });
+        console.log('Upload button event listener registered');
+    } else {
+        console.error('Upload button not found!');
+    }
+
+    if (elements.fileInput) {
+        elements.fileInput.addEventListener('change', handleFileSelect);
+        console.log('File input event listener registered');
+    } else {
+        console.error('File input not found!');
+    }
 
     // PDF navigation
     elements.prevPageBtn.addEventListener('click', () => changePage(-1));
@@ -1017,6 +1031,9 @@ elements.addToVocabBtn.addEventListener('click', addToVocabularyWithBackend);
 // ================================
 
 async function initializeApp() {
+    // Initialize event listeners first
+    init();
+
     const authenticated = await checkAuthentication();
 
     if (authenticated) {
