@@ -466,15 +466,28 @@ body {
     background: var(--gray-100);
 }
 
+.pdf-page-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
 #pdfCanvas {
     box-shadow: 0 0 0 1px var(--gray-300);
     border-radius: var(--radius-md);
     background: var(--white);
+    display: block;
 }
 
 .textLayer {
     position: absolute;
-    opacity: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    opacity: 1;
+    line-height: 1;
+    pointer-events: auto;
 }
 
 .textLayer > span {
@@ -482,10 +495,11 @@ body {
     position: absolute;
     white-space: pre;
     cursor: text;
+    transform-origin: 0% 0%;
 }
 
 .textLayer ::selection {
-    background: rgba(255, 0, 0, 0.15);
+    background: rgba(0, 122, 255, 0.3);
 }
 
 #epubContainer {

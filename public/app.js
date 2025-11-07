@@ -345,10 +345,14 @@ async function renderTextLayer(page, viewport) {
             item.transform
         );
 
+        const fontSize = Math.abs(tx[3]);
+        const left = tx[4];
+        const top = viewport.height - tx[5] - fontSize; // Convert from PDF coordinate system
+
         span.textContent = item.str;
-        span.style.left = tx[4] + 'px';
-        span.style.top = tx[5] + 'px';
-        span.style.fontSize = Math.abs(tx[3]) + 'px';
+        span.style.left = left + 'px';
+        span.style.top = top + 'px';
+        span.style.fontSize = fontSize + 'px';
         span.style.fontFamily = item.fontName;
 
         textLayer.appendChild(span);
