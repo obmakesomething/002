@@ -152,7 +152,9 @@ function createBook(userId, title, filename, fileType, fileSize) {
 
 function getBooksByUserId(userId) {
     const stmt = db.prepare(`
-        SELECT b.*, rp.progress, rp.current_page, rp.last_read
+        SELECT b.id, b.user_id, b.title, b.filename AS file_path, b.file_type,
+               b.file_size, b.uploaded_at,
+               rp.progress, rp.current_page, rp.last_read
         FROM books b
         LEFT JOIN reading_progress rp ON b.id = rp.book_id AND b.user_id = rp.user_id
         WHERE b.user_id = ?
