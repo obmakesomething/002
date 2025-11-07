@@ -183,12 +183,26 @@ async function handleFileSelect(event) {
 
         const uploadResponse = await fetch('/api/books/upload', {
             method: 'POST',
-            body: formData
+            body: formData,
+            credentials: 'include' // Include session cookies
         });
 
         if (!uploadResponse.ok) {
-            const error = await uploadResponse.json();
-            throw new Error(error.error || 'Upload failed');
+            // Try to get error message
+            const contentType = uploadResponse.headers.get('content-type');
+            let errorMessage = 'Upload failed';
+
+            if (contentType && contentType.includes('application/json')) {
+                const error = await uploadResponse.json();
+                errorMessage = error.error || errorMessage;
+            } else {
+                // Server returned HTML (likely error page)
+                const text = await uploadResponse.text();
+                console.error('Server error (HTML):', text.substring(0, 500));
+                errorMessage = `Server error (${uploadResponse.status}): ${uploadResponse.statusText}`;
+            }
+
+            throw new Error(errorMessage);
         }
 
         const uploadData = await uploadResponse.json();
@@ -938,7 +952,9 @@ function getTextNodes(node) {
 
 async function checkAuthentication() {
     try {
-        const response = await fetch('/api/auth/check');
+        const response = await fetch('/api/auth/check', {
+            credentials: 'include'
+        });
         const data = await response.json();
 
         if (!data.authenticated) {
@@ -958,7 +974,10 @@ async function checkAuthentication() {
 
 async function logout() {
     try {
-        await fetch('/api/logout', { method: 'POST' });
+        await fetch('/api/logout', {
+            method: 'POST',
+            credentials: 'include'
+        });
         window.location.href = '/login.html';
     } catch (error) {
         console.error('Logout error:', error);
@@ -975,7 +994,9 @@ document.getElementById('logoutBtn').addEventListener('click', logout);
 
 async function syncVocabularyWithBackend() {
     try {
-        const response = await fetch('/api/vocabulary');
+        const response = await fetch('/api/vocabulary', {
+            credentials: 'include'
+        });
         if (response.ok) {
             const vocabulary = await response.json();
             state.vocabulary = vocabulary.map(item => ({
@@ -1000,6 +1021,7 @@ async function addToVocabularyWithBackend() {
     try {
         const response = await fetch('/api/vocabulary', {
             method: 'POST',
+            credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 word: state.selectedText,
@@ -1083,7 +1105,9 @@ function closeMobileMenu() {
 
 async function loadBooksList() {
     try {
-        const response = await fetch('/api/books');
+        const response = await fetch('/api/books', {
+            credentials: 'include'
+        });
         if (!response.ok) {
             throw new Error('Failed to load books');
         }
@@ -1134,10 +1158,12 @@ function displayBooksList(books) {
 
 async function loadBookFromServer(bookId, filePath) {
     try {
-        showLoading();
+        showLoading(true);
 
         // Fetch the book file
-        const response = await fetch(`/uploads/${filePath}`);
+        const response = await fetch(`/uploads/${filePath}`, {
+            credentials: 'include'
+        });
         if (!response.ok) {
             throw new Error('Failed to load book file');
         }
@@ -1159,11 +1185,11 @@ async function loadBookFromServer(bookId, filePath) {
         // Switch to TOC tab
         switchSidebarTab('toc');
 
-        hideLoading();
+        showLoading(false);
     } catch (error) {
         console.error('Load book from server error:', error);
         alert('Failed to load book: ' + error.message);
-        hideLoading();
+        showLoading(false);
     }
 }
 
