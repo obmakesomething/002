@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Access / PDF Reader</title>
+    <title>Access</title>
     <style>
         * {
             margin: 0;
@@ -11,154 +11,104 @@
             box-sizing: border-box;
         }
 
-        :root {
-            --system-blue: #007AFF;
-            --system-blue-dark: #0051D5;
-            --system-red: #FF3B30;
-            --system-gray: #8E8E93;
-            --system-gray-2: #AEAEB2;
-            --system-gray-5: #E5E5EA;
-            --system-gray-6: #F2F2F7;
-            --label-primary: #000000;
-            --label-secondary: #3C3C43;
-            --background-primary: #F2F2F7;
-            --background-secondary: #FFFFFF;
-        }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
-            font-size: 17px;
-            line-height: 1.47;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
             font-weight: 400;
-            color: var(--label-primary);
-            background: var(--background-primary);
+            color: #000;
+            background: #fff;
             min-height: 100vh;
             min-height: 100dvh;
-            display: grid;
-            place-items: center;
-            padding: 24px;
-            padding-top: calc(24px + env(safe-area-inset-top));
-            padding-bottom: calc(24px + env(safe-area-inset-bottom));
-            padding-left: calc(24px + env(safe-area-inset-left));
-            padding-right: calc(24px + env(safe-area-inset-right));
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
 
         .container {
-            background: var(--background-secondary);
-            border: none;
-            border-radius: 24px;
-            padding: 48px;
             width: 100%;
-            max-width: 480px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1), 0 0 1px rgba(0, 0, 0, 0.05);
+            max-width: 400px;
         }
 
-        .logo {
-            margin-bottom: 48px;
-            text-align: center;
-        }
-
-        .logo h1 {
-            font-size: 48px;
-            font-weight: 700;
-            letter-spacing: -1.5px;
-            color: var(--label-primary);
-            margin-bottom: 8px;
-            line-height: 1;
-        }
-
-        .logo p {
-            font-size: 17px;
-            color: var(--label-secondary);
-            font-weight: 400;
+        h1 {
+            font-size: 24px;
+            font-weight: 500;
             letter-spacing: 0;
+            margin-bottom: 32px;
+            text-transform: uppercase;
         }
 
         .form-group {
             margin-bottom: 24px;
         }
 
-        .form-group label {
+        label {
             display: block;
-            font-size: 15px;
-            font-weight: 600;
+            font-size: 14px;
+            font-weight: 400;
             margin-bottom: 8px;
-            color: var(--label-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
-        .form-group input {
+        input[type="text"] {
             width: 100%;
-            padding: 16px;
-            min-height: 52px;
-            border: 1px solid var(--system-gray-5);
-            border-radius: 12px;
-            background: var(--system-gray-6);
-            font-size: 17px;
-            font-family: inherit;
-            color: var(--label-primary);
-            transition: all 0.2s ease;
-            touch-action: manipulation;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            background: var(--background-secondary);
-            border-color: var(--system-blue);
-            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
-        }
-
-        .form-group input::placeholder {
-            color: var(--system-gray-2);
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 16px;
-            min-height: 52px;
-            background: var(--system-blue);
-            color: white;
+            padding: 12px 0;
             border: none;
-            border-radius: 12px;
-            font-size: 17px;
-            font-weight: 600;
-            letter-spacing: -0.4px;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            border-bottom: 1px solid #000;
+            background: transparent;
+            font-size: 16px;
             font-family: inherit;
-            touch-action: manipulation;
-            box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+            color: #000;
+            outline: none;
+            transition: border-color 0.2s;
         }
 
-        .submit-btn:hover {
-            background: var(--system-blue-dark);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+        input[type="text"]:focus {
+            border-bottom-width: 2px;
         }
 
-        .submit-btn:active {
-            transform: scale(0.98);
+        input[type="text"]::placeholder {
+            color: #999;
         }
 
-        .submit-btn:disabled {
-            background: var(--system-gray-5);
-            color: var(--system-gray);
-            cursor: not-allowed;
+        button {
+            width: 100%;
+            padding: 16px;
+            background: #000;
+            color: #fff;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            font-family: inherit;
+        }
+
+        button:hover {
+            opacity: 0.8;
+        }
+
+        button:active {
             opacity: 0.6;
-            transform: none;
-            box-shadow: none;
+        }
+
+        button:disabled {
+            background: #ccc;
+            color: #666;
+            cursor: not-allowed;
+            opacity: 1;
         }
 
         .error-message {
-            background: rgba(255, 59, 48, 0.1);
-            border-left: 3px solid var(--system-red);
-            border-radius: 12px;
-            color: var(--system-red);
-            padding: 16px;
+            background: #f5f5f5;
+            border-left: 2px solid #000;
+            padding: 12px;
             margin-bottom: 24px;
-            font-size: 15px;
-            line-height: 1.4;
+            font-size: 14px;
             display: none;
         }
 
@@ -167,60 +117,34 @@
         }
 
         .hint {
-            margin-top: 32px;
-            padding-top: 32px;
-            border-top: 1px solid var(--system-gray-5);
-            color: var(--label-tertiary);
-            font-size: 13px;
+            margin-top: 48px;
+            font-size: 12px;
+            color: #999;
             text-align: center;
-        }
-
-        /* iPhone 16 Pro & Mobile Optimization */
-        @media (max-width: 768px) {
-            body {
-                padding: var(--space-2);
-                padding-top: calc(var(--space-2) + env(safe-area-inset-top));
-                padding-bottom: calc(var(--space-2) + env(safe-area-inset-bottom));
-            }
-
-            .container {
-                padding: var(--space-4);
-                max-width: 100%;
-            }
-
-            .logo h1 {
-                font-size: 36px;
-            }
-
-            .form-group input,
-            .submit-btn {
-                min-height: 52px;
-                padding: var(--space-3);
-            }
-
-            * {
-                -webkit-tap-highlight-color: rgba(0, 0, 0, 0.05);
-            }
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
         }
 
         @media (max-width: 480px) {
-            .container {
-                padding: var(--space-3);
-                border-width: 1px;
+            body {
+                padding: 16px;
             }
 
-            .logo h1 {
-                font-size: 28px;
+            h1 {
+                font-size: 20px;
+                margin-bottom: 24px;
+            }
+
+            input[type="text"],
+            button {
+                font-size: 16px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="logo">
-            <h1>Reader</h1>
-            <p>Access Required</p>
-        </div>
+        <h1>Reader</h1>
 
         <div class="error-message" id="errorMessage"></div>
 
@@ -230,17 +154,16 @@
                 <input
                     type="text"
                     id="accessCode"
-                    placeholder=""
                     required
                     autocomplete="off"
                     autofocus
                 >
             </div>
-            <button type="submit" class="submit-btn" id="accessBtn">Enter</button>
+            <button type="submit" id="accessBtn">Enter</button>
         </form>
 
         <div class="hint">
-            Swiss Typography System / 2025
+            Swiss Typography / 2025
         </div>
     </div>
 
@@ -276,19 +199,19 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    btn.textContent = 'Access Granted';
+                    btn.textContent = 'Granted';
                     setTimeout(() => {
                         window.location.href = '/';
                     }, 300);
                 } else {
-                    showError(data.error || 'Invalid access code');
+                    showError(data.error || 'Invalid code');
                     btn.disabled = false;
                     btn.textContent = 'Enter';
                     document.getElementById('accessCode').value = '';
                     document.getElementById('accessCode').focus();
                 }
             } catch (error) {
-                showError('Network error. Please try again.');
+                showError('Network error');
                 btn.disabled = false;
                 btn.textContent = 'Enter';
             }
@@ -301,7 +224,8 @@
                 if (data.authenticated) {
                     window.location.href = '/';
                 }
-            });
+            })
+            .catch(() => {});
     </script>
 </body>
 </html>
