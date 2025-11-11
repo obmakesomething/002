@@ -1431,14 +1431,26 @@ let selectedCategory = 'all';
 
 async function loadBooksList() {
     try {
+        console.log('📚 Loading books from /api/books...');
+
         const response = await fetch('/api/books', {
             credentials: 'include'
         });
+
+        console.log('Response status:', response.status, response.statusText);
+
         if (!response.ok) {
-            throw new Error('Failed to load books');
+            const errorText = await response.text();
+            console.error('API error response:', errorText);
+            throw new Error(`Failed to load books: ${response.status}`);
         }
 
         allBooks = await response.json();
+        console.log(`✅ Loaded ${allBooks.length} books`);
+
+        if (allBooks.length > 0) {
+            console.log('First book:', allBooks[0]);
+        }
 
         // Populate category filter
         populateCategoryFilter();
@@ -1455,8 +1467,8 @@ async function loadBooksList() {
             });
         }
     } catch (error) {
-        console.error('Load books error:', error);
-        elements.booksList.innerHTML = '<p style="color: #999; text-align: center; margin-top: 2rem; font-size: 11px;">Failed to load books</p>';
+        console.error('❌ Load books error:', error);
+        elements.booksList.innerHTML = `<p style="color: #e74c3c; text-align: center; margin-top: 2rem; font-size: 12px;">Failed to load books<br><small style="color: #999;">${error.message}</small></p>`;
     }
 }
 
