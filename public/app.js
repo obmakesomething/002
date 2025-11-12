@@ -1500,10 +1500,14 @@ function filterAndDisplayBooks() {
 }
 
 function displayBooksList(books) {
+    console.log(`📋 Displaying ${books ? books.length : 0} books`);
+
     if (!books || books.length === 0) {
-        elements.booksList.innerHTML = '<p style="color: #999; text-align: center; margin-top: 2rem; font-size: 11px;">No books found</p>';
+        elements.booksList.innerHTML = '<p style="color: var(--text-tertiary); text-align: center; margin-top: 2rem; font-size: 13px; line-height: 1.6;">No books found<br><small style="font-size: 11px;">Upload a book to get started</small></p>';
         return;
     }
+
+    console.log('Rendering book items...');
 
     elements.booksList.innerHTML = books.map(book => {
         const fileType = book.file_type === 'application/pdf' ? 'PDF' : 'EPUB';
@@ -1511,7 +1515,7 @@ function displayBooksList(books) {
         const uploadDate = new Date(book.uploaded_at).toLocaleDateString('ko-KR');
         const source = book.source || 'uploaded';
         const sourceIcon = source === 'collection' ? '📚' : '📁';
-        const category = book.category ? `<span style="font-size: 9px; color: var(--system-gray);">· ${book.category}</span>` : '';
+        const category = book.category ? `<span style="font-size: 10px; color: var(--text-tertiary);">· ${book.category}</span>` : '';
 
         return `
             <div class="book-item" data-book-id="${book.id}" data-file-path="${book.file_path}" data-source="${source}" data-category="${book.category || ''}">
@@ -1521,11 +1525,13 @@ function displayBooksList(books) {
                     <span>${fileSize} MB</span>
                 </div>
                 <div class="book-meta" style="margin-top: 4px;">
-                    <span style="font-size: 8px; color: var(--gray-500);">${uploadDate} ${category}</span>
+                    <span style="font-size: 10px; color: var(--text-tertiary);">${uploadDate} ${category}</span>
                 </div>
             </div>
         `;
     }).join('');
+
+    console.log(`✅ Rendered ${books.length} book items`);
 
     // Add click handlers to book items
     document.querySelectorAll('.book-item').forEach(item => {
@@ -1533,6 +1539,7 @@ function displayBooksList(books) {
             const bookId = item.dataset.bookId;
             const filePath = item.dataset.filePath;
             const source = item.dataset.source;
+            console.log(`📖 Opening book: ${filePath} (source: ${source})`);
             await loadBookFromServer(bookId, filePath, source);
             closeMobileMenu();
         });
