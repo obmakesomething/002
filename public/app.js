@@ -1111,48 +1111,75 @@ function setupBionicEventListeners() {
         });
     });
 
-    // Bionic settings
-    document.getElementById('bionicEnabled').addEventListener('change', (e) => {
-        bionicSettings.enabled = e.target.checked;
-        if (bionicSettings.enabled) {
-            applyBionicReading();
-        } else {
-            removeBionicReading();
-        }
-    });
+    // Bionic settings - add null checks
+    const bionicEnabled = document.getElementById('bionicEnabled');
+    if (bionicEnabled) {
+        bionicEnabled.addEventListener('change', (e) => {
+            bionicSettings.enabled = e.target.checked;
+            if (bionicSettings.enabled) {
+                applyBionicReading();
+            } else {
+                removeBionicReading();
+            }
+        });
+    }
 
-    document.getElementById('fixationLevel').addEventListener('input', (e) => {
-        bionicSettings.fixation = parseInt(e.target.value);
-        document.getElementById('fixationValue').textContent = e.target.value;
-    });
+    const fixationLevel = document.getElementById('fixationLevel');
+    const fixationValue = document.getElementById('fixationValue');
+    if (fixationLevel && fixationValue) {
+        fixationLevel.addEventListener('input', (e) => {
+            bionicSettings.fixation = parseInt(e.target.value);
+            fixationValue.textContent = e.target.value;
+        });
+    }
 
-    document.getElementById('saccadeLevel').addEventListener('input', (e) => {
-        bionicSettings.saccade = parseInt(e.target.value);
-        document.getElementById('saccadeValue').textContent = e.target.value;
-    });
+    const saccadeLevel = document.getElementById('saccadeLevel');
+    const saccadeValue = document.getElementById('saccadeValue');
+    if (saccadeLevel && saccadeValue) {
+        saccadeLevel.addEventListener('input', (e) => {
+            bionicSettings.saccade = parseInt(e.target.value);
+            saccadeValue.textContent = e.target.value;
+        });
+    }
 
-    document.getElementById('opacityLevel').addEventListener('input', (e) => {
-        bionicSettings.opacity = parseInt(e.target.value);
-        document.getElementById('opacityValue').textContent = e.target.value + '%';
-    });
+    const opacityLevel = document.getElementById('opacityLevel');
+    const opacityValue = document.getElementById('opacityValue');
+    if (opacityLevel && opacityValue) {
+        opacityLevel.addEventListener('input', (e) => {
+            bionicSettings.opacity = parseInt(e.target.value);
+            opacityValue.textContent = e.target.value + '%';
+        });
+    }
 
-    document.getElementById('bionicMode').addEventListener('change', (e) => {
-        bionicSettings.mode = e.target.value;
-    });
+    const bionicMode = document.getElementById('bionicMode');
+    if (bionicMode) {
+        bionicMode.addEventListener('change', (e) => {
+            bionicSettings.mode = e.target.value;
+        });
+    }
 
-    document.getElementById('bionicApply').addEventListener('change', (e) => {
-        bionicSettings.apply = e.target.value;
-    });
+    const bionicApply = document.getElementById('bionicApply');
+    if (bionicApply) {
+        bionicApply.addEventListener('change', (e) => {
+            bionicSettings.apply = e.target.value;
+        });
+    }
 
-    document.getElementById('applyBionic').addEventListener('click', () => {
-        if (bionicSettings.enabled) {
-            applyBionicReading();
-        }
-    });
+    const applyBionic = document.getElementById('applyBionic');
+    if (applyBionic) {
+        applyBionic.addEventListener('click', () => {
+            if (bionicSettings.enabled) {
+                applyBionicReading();
+            }
+        });
+    }
 
-    document.getElementById('bionicToggle').addEventListener('click', () => {
-        switchSidebarTab('bionic');
-    });
+    const bionicToggle = document.getElementById('bionicToggle');
+    if (bionicToggle) {
+        bionicToggle.addEventListener('click', () => {
+            switchSidebarTab('bionic');
+        });
+    }
 }
 
 function switchSidebarTab(tabName) {
